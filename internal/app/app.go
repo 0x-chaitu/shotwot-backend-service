@@ -11,7 +11,8 @@ import (
 	"shotwot_backend/internal/repository"
 	"shotwot_backend/internal/server"
 	"shotwot_backend/internal/service"
-	postgres "shotwot_backend/pkg/database"
+	"shotwot_backend/pkg/auth"
+	"shotwot_backend/pkg/database/mongodb"
 	"shotwot_backend/pkg/logger"
 	"syscall"
 	"time"
@@ -25,16 +26,28 @@ func Run(configPath string) {
 		return
 	}
 
-	postgresClient, err := postgres.New("postgresql://root:secret@127.0.0.1:5434/root", postgres.MaxPoolSize(50))
+	mongoClient, err := mongodb.NewClient("mongodb+srv://chaitu:chaitu@cluster0.4cmhaeu.mongodb.net/?retryWrites=true&w=majority")
 	if err != nil {
 		logger.Error(err)
 
 		return
 	}
-	repos := repository.NewRepositories(postgresClient)
+
+	db := mongoClient.Database("shotwot")
+
+	repos := repository.NewRepositories(db)
+	tokenManager, err := auth.NewManager(cfg.Auth.JWT.SigningKey)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+
 	services := service.NewServices(
 		service.Deps{
-			Repos: repos,
+			Repos:           repos,
+			TokenManager:    tokenManager,
+			AccessTokenTTL:  cfg.Auth.JWT.AccessTokenTTL,
+			RefreshTokenTTL: cfg.Auth.JWT.RefreshTokenTTL,
 		})
 	handlers := delivery.NewHandler(services)
 

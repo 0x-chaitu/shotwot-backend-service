@@ -2,8 +2,11 @@ package config
 
 import (
 	"os"
+	"shotwot_backend/pkg/logger"
 	"time"
 
+	"github.com/joho/godotenv"
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/spf13/viper"
 )
 
@@ -12,6 +15,9 @@ const (
 	defaultHTTPRWTimeout          = 10 * time.Second
 	defaultHTTPMaxHeaderMegabytes = 1
 
+	defaultAccessTokenTTL  = 15 * time.Minute
+	defaultRefreshTokenTTL = 24 * time.Hour * 30
+
 	EnvLocal = "local"
 	Prod     = "prod"
 )
@@ -19,6 +25,17 @@ const (
 type (
 	Config struct {
 		HTTP HTTPConfig
+		Auth AuthConfig
+	}
+
+	AuthConfig struct {
+		JWT JWTConfig
+	}
+
+	JWTConfig struct {
+		AccessTokenTTL  time.Duration `mapstructure:"accessTokenTTL"`
+		RefreshTokenTTL time.Duration `mapstructure:"refreshTokenTTL"`
+		SigningKey      string
 	}
 
 	HTTPConfig struct {
@@ -51,14 +68,22 @@ func unmarshal(cfg *Config) error {
 	if err := viper.UnmarshalKey("http", &cfg.HTTP); err != nil {
 		return err
 	}
+	if err := viper.UnmarshalKey("auth", &cfg.Auth.JWT); err != nil {
+		return err
+	}
+	logger.Info(&cfg.Auth.JWT)
 
 	return nil
 }
 
 func setFromEnv(cfg *Config) {
-	// TODO use envconfig https://github.com/kelseyhightower/envconfig
+	err := godotenv.Load(".env")
+	if err != nil {
+		logger.Error("Error loading .env file")
+	}
 
 	cfg.HTTP.Host = os.Getenv("HTTP_HOST")
+	cfg.Auth.JWT.SigningKey = os.Getenv("JWT_SIGNING_KEY")
 }
 
 func parseConfigFile(folder, env string) error {
@@ -83,4 +108,7 @@ func populateDefaults() {
 	viper.SetDefault("http.max_header_megabytes", defaultHTTPMaxHeaderMegabytes)
 	viper.SetDefault("http.timeouts.read", defaultHTTPRWTimeout)
 	viper.SetDefault("http.timeouts.write", defaultHTTPRWTimeout)
+
+	viper.SetDefault("auth.accessTokenTTL", defaultAccessTokenTTL)
+	viper.SetDefault("auth.refreshTokenTTL", defaultRefreshTokenTTL)
 }

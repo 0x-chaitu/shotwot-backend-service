@@ -3,19 +3,22 @@ package repository
 import (
 	"context"
 	"shotwot_backend/internal/domain"
-	postgres "shotwot_backend/pkg/database"
+
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type AccountsRepo struct {
-	*postgres.Postgres
+	db *mongo.Collection
 }
 
-func NewAccountsRepo(pg *postgres.Postgres) *AccountsRepo {
-	return &AccountsRepo{pg}
+func NewAccountsRepo(db *mongo.Database) *AccountsRepo {
+	return &AccountsRepo{
+		db: db.Collection("accounts"),
+	}
 }
 
-func (r *AccountsRepo) Create(ctx context.Context, user domain.Account) error {
-	return nil
+func (r *AccountsRepo) Create(ctx context.Context, user *domain.Account) (*domain.Account, error) {
+	return nil, nil
 }
 
 func (r *AccountsRepo) GetByCredentials(ctx context.Context, userIdentifier, password string) (domain.Account, error) {

@@ -13,7 +13,7 @@ import (
 )
 
 type Account struct {
-	Id       int       `json:"uid"`
+	Id       string    `json:"uid"`
 	Name     string    `json:"username"`
 	Password string    `json:"password"`
 	Email    string    `json:"email"`

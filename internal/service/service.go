@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"shotwot_backend/internal/repository"
+	"shotwot_backend/pkg/auth"
+	"time"
 )
 
 type AccountSignUpInput struct {
@@ -19,12 +21,12 @@ type AccountSignInInput struct {
 
 type Tokens struct {
 	AccessToken  string `json:"accesstoken"`
-	RefreshToken string `json:"refreashtoken"`
+	RefreshToken string `json:"refreshtoken"`
 }
 
 type Accounts interface {
-	SignUp(ctx context.Context, input AccountSignUpInput) error
-	SignIn(ctx context.Context, input AccountSignInInput) (Tokens, error)
+	SignUp(ctx context.Context, input AccountSignUpInput) (*Tokens, error)
+	SignIn(ctx context.Context, input AccountSignInInput) (*Tokens, error)
 	// RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error)
 	// Verify(ctx context.Context, userID primitive.ObjectID, hash string) error
 }
@@ -34,11 +36,15 @@ type Services struct {
 }
 
 type Deps struct {
-	Repos *repository.Repositories
+	Repos        *repository.Repositories
+	TokenManager auth.TokenManager
+
+	AccessTokenTTL  time.Duration
+	RefreshTokenTTL time.Duration
 }
 
 func NewServices(deps Deps) *Services {
-	accountService := NewAccountsService(deps.Repos.Accounts)
+	accountService := NewAccountsService(deps.Repos.Accounts, deps.TokenManager, deps.AccessTokenTTL, deps.RefreshTokenTTL)
 	return &Services{
 		Accounts: accountService,
 	}
