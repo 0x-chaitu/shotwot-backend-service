@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"shotwot_backend/internal/domain"
+	"shotwot_backend/pkg/database/mongodb"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -18,6 +19,10 @@ func NewAccountsRepo(db *mongo.Database) *AccountsRepo {
 }
 
 func (r *AccountsRepo) Create(ctx context.Context, user *domain.Account) (*domain.Account, error) {
+	_, err := r.db.InsertOne(ctx, user)
+	if mongodb.IsDuplicate(err) {
+		return nil, domain.ErrAccountAlreadyExists
+	}
 	return nil, nil
 }
 

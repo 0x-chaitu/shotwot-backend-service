@@ -13,28 +13,26 @@ import (
 )
 
 type Account struct {
-	Id       string    `json:"uid"`
-	Name     string    `json:"username"`
-	Password string    `json:"password"`
-	Email    string    `json:"email"`
-	Created  time.Time `json:"created"`
+	Id        string    `bson:"_id" json:"id"`
+	FirstName string    `bson:"firstname" json:"firstname"`
+	LastName  string    `bson:"lastname" json:"lastname"`
+	Email     string    `bson:"email" json:"email" `
+	Created   time.Time `bson:"created" json:"created"`
 }
 
 // Validate validates a newly created user, which has not persisted to database yet, so Id is empty
 func (a Account) Validate() error {
 	return validation.ValidateStruct(&a,
-		validation.Field(&a.Name, validation.Required, validation.Length(3, 126)),
+		validation.Field(&a.FirstName, validation.Required, validation.Length(3, 126)),
 		validation.Field(&a.Email, validation.Required, is.Email),
-		validation.Field(&a.Password, validation.Required, validation.Length(6, 72)),
 	)
 }
 
 // ValidatePersisted validate a user that has been persisted to database, basically Id is not empty
 func (a Account) ValidatePersisted() error {
 	return validation.ValidateStruct(&a,
-		validation.Field(&a.Name, validation.Required, validation.Length(3, 126)),
+		validation.Field(&a.FirstName, validation.Required, validation.Length(3, 126)),
 		validation.Field(&a.Email, validation.Required, is.Email),
-		validation.Field(&a.Password, validation.Required, validation.Length(6, 72)),
 		validation.Field(&a.Created, validation.Required),
 	)
 }

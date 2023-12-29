@@ -44,7 +44,7 @@ func NewHandler(services *service.Services) *Handler {
 
 func (h *Handler) Init() http.Handler {
 	r := chi.NewRouter()
-	r.Mount("/users", h.initAccountsRoutes())
+	r.Mount("/accounts", h.initAccountsRoutes())
 
 	return r
 }

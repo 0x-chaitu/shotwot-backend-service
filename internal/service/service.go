@@ -4,11 +4,11 @@ import (
 	"context"
 	"shotwot_backend/internal/repository"
 	"shotwot_backend/pkg/auth"
+	"shotwot_backend/pkg/firebase"
 	"time"
 )
 
 type AccountSignUpInput struct {
-	Name     string `json:"username"`
 	Password string `json:"password"`
 	Email    string `json:"email"`
 }
@@ -41,10 +41,12 @@ type Deps struct {
 
 	AccessTokenTTL  time.Duration
 	RefreshTokenTTL time.Duration
+
+	AuthClient *firebase.AuthClient
 }
 
 func NewServices(deps Deps) *Services {
-	accountService := NewAccountsService(deps.Repos.Accounts, deps.TokenManager, deps.AccessTokenTTL, deps.RefreshTokenTTL)
+	accountService := NewAccountsService(deps.Repos.Accounts, deps.TokenManager, deps.AccessTokenTTL, deps.RefreshTokenTTL, deps.AuthClient)
 	return &Services{
 		Accounts: accountService,
 	}

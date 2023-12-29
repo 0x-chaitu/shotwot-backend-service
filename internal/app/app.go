@@ -13,6 +13,7 @@ import (
 	"shotwot_backend/internal/service"
 	"shotwot_backend/pkg/auth"
 	"shotwot_backend/pkg/database/mongodb"
+	"shotwot_backend/pkg/firebase"
 	"shotwot_backend/pkg/logger"
 	"syscall"
 	"time"
@@ -41,13 +42,18 @@ func Run(configPath string) {
 		logger.Error(err)
 		return
 	}
-
+	authClient, err := firebase.NewAuthClient()
+	if err != nil {
+		logger.Error(err)
+		return
+	}
 	services := service.NewServices(
 		service.Deps{
 			Repos:           repos,
 			TokenManager:    tokenManager,
 			AccessTokenTTL:  cfg.Auth.JWT.AccessTokenTTL,
 			RefreshTokenTTL: cfg.Auth.JWT.RefreshTokenTTL,
+			AuthClient:      authClient,
 		})
 	handlers := delivery.NewHandler(services)
 
