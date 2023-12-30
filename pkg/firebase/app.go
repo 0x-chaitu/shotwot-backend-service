@@ -4,8 +4,8 @@ import (
 	"context"
 	"shotwot_backend/pkg/logger"
 
-	firebase "firebase.google.com/go"
-	fireauth "firebase.google.com/go/auth"
+	firebase "firebase.google.com/go/v4"
+	fireauth "firebase.google.com/go/v4/auth"
 	"google.golang.org/api/option"
 )
 

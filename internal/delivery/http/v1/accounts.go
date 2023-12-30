@@ -22,7 +22,7 @@ func (h *Handler) initAccountsRoutes() http.Handler {
 
 func (h *Handler) accountSignUp(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var inp service.AccountSignUpInput
+	var inp service.AccountAuthInput
 	err := decoder.Decode(&inp)
 	if err != nil {
 		render.Render(w, r, &ErrResponse{
@@ -36,7 +36,13 @@ func (h *Handler) accountSignUp(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, domain.ErrAccountAlreadyExists) {
 			render.Render(w, r, &ErrResponse{
 				HTTPStatusCode: http.StatusConflict,
-				ErrorText:      "User account already Exists",
+				ErrorText:      domain.ErrAccountAlreadyExists.Error(),
+			})
+			return
+		} else if errors.Is(err, domain.ErrEmailPasswordInvalid) {
+			render.Render(w, r, &ErrResponse{
+				HTTPStatusCode: http.StatusUnprocessableEntity,
+				ErrorText:      domain.ErrEmailPasswordInvalid.Error(),
 			})
 			return
 		}
@@ -54,12 +60,12 @@ func (h *Handler) accountSignUp(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) accountSignIn(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var inp service.AccountSignInInput
+	var inp service.AccountAuthInput
 	err := decoder.Decode(&inp)
 	if err != nil {
 		render.Render(w, r, &ErrResponse{
 			HTTPStatusCode: http.StatusBadRequest,
-			ErrorText:      "Invalid input body",
+			Err:            err,
 		})
 		return
 	}

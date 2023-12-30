@@ -8,13 +8,7 @@ import (
 	"time"
 )
 
-type AccountSignUpInput struct {
-	Password string `json:"password"`
-	Email    string `json:"email"`
-}
-
-type AccountSignInInput struct {
-	Name     string `json:"username"`
+type AccountAuthInput struct {
 	Password string `json:"password"`
 	Email    string `json:"email"`
 }
@@ -25,8 +19,8 @@ type Tokens struct {
 }
 
 type Accounts interface {
-	SignUp(ctx context.Context, input AccountSignUpInput) (*Tokens, error)
-	SignIn(ctx context.Context, input AccountSignInInput) (*Tokens, error)
+	SignUp(ctx context.Context, input AccountAuthInput) (*Tokens, error)
+	SignIn(ctx context.Context, input AccountAuthInput) (*Tokens, error)
 	// RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error)
 	// Verify(ctx context.Context, userID primitive.ObjectID, hash string) error
 }

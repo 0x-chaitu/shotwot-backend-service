@@ -13,19 +13,17 @@ import (
 )
 
 type Account struct {
-	Id        string    `bson:"_id" json:"id"`
-	FirstName string    `bson:"firstname" json:"firstname"`
-	LastName  string    `bson:"lastname" json:"lastname"`
-	Email     string    `bson:"email" json:"email" `
-	Created   time.Time `bson:"created" json:"created"`
-}
-
-// Validate validates a newly created user, which has not persisted to database yet, so Id is empty
-func (a Account) Validate() error {
-	return validation.ValidateStruct(&a,
-		validation.Field(&a.FirstName, validation.Required, validation.Length(3, 126)),
-		validation.Field(&a.Email, validation.Required, is.Email),
-	)
+	Id           string    `bson:"_id" json:"id"`
+	FirstName    string    `bson:"firstname" json:"firstname"`
+	LastName     string    `bson:"lastname" json:"lastname"`
+	Email        string    `bson:"email" json:"email" `
+	Mobile       string    `bson:"mobile" json:"mobile"`
+	ShowReel     string    `bson:"showreel" json:"showreel"`
+	ProfileImage string    `bson:"profileimage" json:"profileimage"`
+	Bio          string    `bson:"bio" json:"bio"`
+	Address      Address   `bson:"address" json:"address"`
+	Pro          bool      `bson:"pro" json:"pro"`
+	Created      time.Time `bson:"created" json:"created"`
 }
 
 // ValidatePersisted validate a user that has been persisted to database, basically Id is not empty
