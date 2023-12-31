@@ -7,4 +7,6 @@ var (
 	ErrVerificationCodeInvalid = errors.New("verification code is invalid")
 	ErrAccountAlreadyExists    = errors.New("user email already exists")
 	ErrEmailPasswordInvalid    = errors.New("email or password is invalid")
+	ErrNotAuthorized           = errors.New("user not authorized")
+	ErrInvalidInput            = errors.New("invalid input")
 )

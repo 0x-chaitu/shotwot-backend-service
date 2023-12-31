@@ -2,8 +2,9 @@ package service
 
 import (
 	"context"
+	"shotwot_backend/internal/domain"
 	"shotwot_backend/internal/repository"
-	"shotwot_backend/pkg/auth"
+	jwtauth "shotwot_backend/pkg/auth"
 	"shotwot_backend/pkg/firebase"
 	"time"
 )
@@ -18,20 +19,26 @@ type Tokens struct {
 	RefreshToken string `json:"refreshtoken"`
 }
 
-type Accounts interface {
+type Users interface {
 	SignUp(ctx context.Context, input AccountAuthInput) (*Tokens, error)
 	SignIn(ctx context.Context, input AccountAuthInput) (*Tokens, error)
+	Update(ctx context.Context, input *domain.User) (*domain.User, error)
 	// RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error)
 	// Verify(ctx context.Context, userID primitive.ObjectID, hash string) error
 }
 
+type Auth interface {
+	UserIdentity(token string) (*jwtauth.CustomClaims, error)
+}
+
 type Services struct {
-	Accounts Accounts
+	Users Users
+	Auth  Auth
 }
 
 type Deps struct {
 	Repos        *repository.Repositories
-	TokenManager auth.TokenManager
+	TokenManager jwtauth.TokenManager
 
 	AccessTokenTTL  time.Duration
 	RefreshTokenTTL time.Duration
@@ -40,8 +47,10 @@ type Deps struct {
 }
 
 func NewServices(deps Deps) *Services {
-	accountService := NewAccountsService(deps.Repos.Accounts, deps.TokenManager, deps.AccessTokenTTL, deps.RefreshTokenTTL, deps.AuthClient)
+	userService := NewUsersService(deps.Repos.Users, deps.TokenManager, deps.AccessTokenTTL, deps.RefreshTokenTTL, deps.AuthClient)
+	authService := NewAuthService(deps.TokenManager)
 	return &Services{
-		Accounts: accountService,
+		Users: userService,
+		Auth:  authService,
 	}
 }

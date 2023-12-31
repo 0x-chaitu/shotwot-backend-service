@@ -6,21 +6,27 @@ import (
 	"net/http"
 	"shotwot_backend/internal/domain"
 	"shotwot_backend/internal/service"
+	jwtauth "shotwot_backend/pkg/auth"
+	"shotwot_backend/pkg/logger"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 )
 
-func (h *Handler) initAccountsRoutes() http.Handler {
+func (h *Handler) initUsersRoutes() http.Handler {
 	r := chi.NewRouter()
 
-	r.Post("/signup", h.accountSignUp)
-	r.Post("/signin", h.accountSignIn)
+	r.Post("/signup", h.userSignUp)
+	r.Post("/signin", h.userSignIn)
+	r.Route("/", func(r chi.Router) {
+		r.Use(h.parseUser)
+		r.Put("/update", h.userUpdate)
+	})
 	return r
 
 }
 
-func (h *Handler) accountSignUp(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) userSignUp(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var inp service.AccountAuthInput
 	err := decoder.Decode(&inp)
@@ -31,7 +37,7 @@ func (h *Handler) accountSignUp(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	tokens, err := h.services.Accounts.SignUp(r.Context(), inp)
+	tokens, err := h.services.Users.SignUp(r.Context(), inp)
 	if err != nil {
 		if errors.Is(err, domain.ErrAccountAlreadyExists) {
 			render.Render(w, r, &ErrResponse{
@@ -46,6 +52,7 @@ func (h *Handler) accountSignUp(w http.ResponseWriter, r *http.Request) {
 			})
 			return
 		}
+		logger.Error("error during signup ", err)
 		render.Render(w, r, &ErrResponse{
 			HTTPStatusCode: http.StatusInternalServerError,
 			Err:            err,
@@ -58,7 +65,7 @@ func (h *Handler) accountSignUp(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (h *Handler) accountSignIn(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) userSignIn(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var inp service.AccountAuthInput
 	err := decoder.Decode(&inp)
@@ -69,7 +76,7 @@ func (h *Handler) accountSignIn(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	tokens, err := h.services.Accounts.SignIn(r.Context(), inp)
+	tokens, err := h.services.Users.SignIn(r.Context(), inp)
 	if err != nil {
 		render.Render(w, r, &ErrResponse{
 			HTTPStatusCode: http.StatusNotFound,
@@ -81,4 +88,31 @@ func (h *Handler) accountSignIn(w http.ResponseWriter, r *http.Request) {
 	render.Render(w, r, &TokenResponse{
 		Tokens: tokens,
 	})
+}
+
+func (h *Handler) userUpdate(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	var user domain.User
+	err := decoder.Decode(&user)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			Err:            err,
+		})
+		return
+	}
+	ctx := r.Context()
+	userIdentity := ctx.Value(userCtx{}).(*jwtauth.CustomClaims)
+	user.Id = userIdentity.Subject
+	updatedUser, err := h.services.Users.Update(ctx, &user)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			Err:            err,
+		})
+		return
+	}
+
+	render.Status(r, http.StatusOK)
+	render.Render(w, r, updatedUser)
 }

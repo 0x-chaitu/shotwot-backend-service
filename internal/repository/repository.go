@@ -7,19 +7,18 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type Accounts interface {
-	Create(ctx context.Context, user *domain.Account) (*domain.Account, error)
+type Users interface {
+	Create(ctx context.Context, user *domain.User) (*domain.User, error)
 
-	//userIdentifier can be username, email
-	GetByCredentials(ctx context.Context, userIdentifier, password string) (domain.Account, error)
+	Update(ctx context.Context, user *domain.User) (*domain.User, error)
 }
 
 type Repositories struct {
-	Accounts Accounts
+	Users Users
 }
 
 func NewRepositories(db *mongo.Database) *Repositories {
 	return &Repositories{
-		Accounts: NewAccountsRepo(db),
+		Users: NewUsersRepo(db),
 	}
 }

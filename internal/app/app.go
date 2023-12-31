@@ -11,7 +11,7 @@ import (
 	"shotwot_backend/internal/repository"
 	"shotwot_backend/internal/server"
 	"shotwot_backend/internal/service"
-	"shotwot_backend/pkg/auth"
+	jwtauth "shotwot_backend/pkg/auth"
 	"shotwot_backend/pkg/database/mongodb"
 	"shotwot_backend/pkg/firebase"
 	"shotwot_backend/pkg/logger"
@@ -30,14 +30,13 @@ func Run(configPath string) {
 	mongoClient, err := mongodb.NewClient("mongodb+srv://chaitu:chaitu@cluster0.4cmhaeu.mongodb.net/?retryWrites=true&w=majority")
 	if err != nil {
 		logger.Error(err)
-
 		return
 	}
 
 	db := mongoClient.Database("shotwot")
 
 	repos := repository.NewRepositories(db)
-	tokenManager, err := auth.NewManager(cfg.Auth.JWT.SigningKey)
+	tokenManager, err := jwtauth.NewManager(cfg.Auth.JWT.SigningKey)
 	if err != nil {
 		logger.Error(err)
 		return
