@@ -6,7 +6,6 @@ import (
 
 	firebase "firebase.google.com/go/v4"
 	fireauth "firebase.google.com/go/v4/auth"
-	"google.golang.org/api/option"
 )
 
 type AuthClient struct {
@@ -14,8 +13,7 @@ type AuthClient struct {
 }
 
 func NewAuthClient() (*AuthClient, error) {
-	opt := option.WithCredentialsFile("/home/chaitu/Projects/showot/shotwot_backend/shotwot_test_firebase.json")
-	app, err := firebase.NewApp(context.Background(), nil, opt)
+	app, err := firebase.NewApp(context.Background(), nil)
 	if err != nil {
 		return nil, err
 	}

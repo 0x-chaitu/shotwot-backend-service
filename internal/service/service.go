@@ -12,6 +12,7 @@ import (
 type AccountAuthInput struct {
 	Password string `json:"password"`
 	Email    string `json:"email"`
+	IdToken  string `json:"idToken"`
 }
 
 type Tokens struct {
@@ -20,9 +21,11 @@ type Tokens struct {
 }
 
 type Users interface {
-	SignUp(ctx context.Context, input AccountAuthInput) (*Tokens, error)
+	SignUp(ctx context.Context, input string) (*Tokens, error)
 	SignIn(ctx context.Context, input AccountAuthInput) (*Tokens, error)
 	Update(ctx context.Context, input *domain.User) (*domain.User, error)
+	GetUser(ctx context.Context, id string) (*domain.User, error)
+	Delete(ctx context.Context, id string) error
 	// RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error)
 	// Verify(ctx context.Context, userID primitive.ObjectID, hash string) error
 }

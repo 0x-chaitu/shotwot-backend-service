@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"shotwot_backend/internal/domain"
+	"shotwot_backend/pkg/logger"
 	"strings"
 
 	"github.com/go-chi/render"
@@ -20,6 +21,7 @@ func (h *Handler) parseUser(next http.Handler) http.Handler {
 		header := r.Header.Get(auth)
 		splitToken := strings.Split(header, " ")
 		if len(splitToken) != 2 {
+			logger.Error(" invalid token ")
 			render.Render(w, r, &ErrResponse{
 				HTTPStatusCode: http.StatusForbidden,
 				ErrorText:      domain.ErrNotAuthorized.Error(),
@@ -28,6 +30,7 @@ func (h *Handler) parseUser(next http.Handler) http.Handler {
 		}
 		userId, err := h.services.Auth.UserIdentity(splitToken[1])
 		if err != nil {
+			logger.Errorf("error in authenticating user %v", err)
 			render.Render(w, r, &ErrResponse{
 				HTTPStatusCode: http.StatusForbidden,
 				ErrorText:      domain.ErrNotAuthorized.Error(),

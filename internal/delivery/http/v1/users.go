@@ -18,9 +18,11 @@ func (h *Handler) initUsersRoutes() http.Handler {
 
 	r.Post("/signup", h.userSignUp)
 	r.Post("/signin", h.userSignIn)
+	r.Get("/user/{userId}", h.getUser)
 	r.Route("/", func(r chi.Router) {
 		r.Use(h.parseUser)
 		r.Put("/update", h.userUpdate)
+		r.Delete("/delete", h.deleteUser)
 	})
 	return r
 
@@ -33,11 +35,11 @@ func (h *Handler) userSignUp(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		render.Render(w, r, &ErrResponse{
 			HTTPStatusCode: http.StatusBadRequest,
-			Err:            err,
+			ErrorText:      err.Error(),
 		})
 		return
 	}
-	tokens, err := h.services.Users.SignUp(r.Context(), inp)
+	tokens, err := h.services.Users.SignUp(r.Context(), inp.IdToken)
 	if err != nil {
 		if errors.Is(err, domain.ErrAccountAlreadyExists) {
 			render.Render(w, r, &ErrResponse{
@@ -55,7 +57,7 @@ func (h *Handler) userSignUp(w http.ResponseWriter, r *http.Request) {
 		logger.Error("error during signup ", err)
 		render.Render(w, r, &ErrResponse{
 			HTTPStatusCode: http.StatusInternalServerError,
-			Err:            err,
+			ErrorText:      err.Error(),
 		})
 		return
 	}
@@ -72,7 +74,7 @@ func (h *Handler) userSignIn(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		render.Render(w, r, &ErrResponse{
 			HTTPStatusCode: http.StatusBadRequest,
-			Err:            err,
+			ErrorText:      err.Error(),
 		})
 		return
 	}
@@ -97,7 +99,7 @@ func (h *Handler) userUpdate(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		render.Render(w, r, &ErrResponse{
 			HTTPStatusCode: http.StatusBadRequest,
-			Err:            err,
+			ErrorText:      err.Error(),
 		})
 		return
 	}
@@ -108,11 +110,45 @@ func (h *Handler) userUpdate(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		render.Render(w, r, &ErrResponse{
 			HTTPStatusCode: http.StatusBadRequest,
-			Err:            err,
+			ErrorText:      err.Error(),
 		})
 		return
 	}
 
 	render.Status(r, http.StatusOK)
 	render.Render(w, r, updatedUser)
+}
+
+func (h *Handler) getUser(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "userId")
+	user, err := h.services.Users.GetUser(r.Context(), id)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+	render.Status(r, http.StatusOK)
+	render.Render(w, r, user)
+}
+
+func (h *Handler) deleteUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userIdentity := ctx.Value(userCtx{}).(*jwtauth.CustomClaims)
+	id := userIdentity.Subject
+	err := h.services.Users.Delete(ctx, id)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+
+	render.Status(r, http.StatusOK)
+	render.Render(w, r, &AppResponse{
+		HTTPStatusCode: http.StatusOK,
+		SuccessText:    "user deleted successfully",
+	})
 }
