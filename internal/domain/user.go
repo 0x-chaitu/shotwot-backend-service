@@ -32,10 +32,6 @@ func (u *User) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-type UserIdentity struct {
-	UserId string
-}
-
 func (u *User) Validate() error {
 	return validation.ValidateStruct(&u,
 		validation.Field(&u.FirstName, validation.Required, validation.Length(3, 126)),

@@ -41,3 +41,29 @@ func (h *Handler) parseUser(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
+
+func (h *Handler) parseAdmin(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		header := r.Header.Get(auth)
+		splitToken := strings.Split(header, " ")
+		if len(splitToken) != 2 {
+			logger.Error(" invalid token ")
+			render.Render(w, r, &ErrResponse{
+				HTTPStatusCode: http.StatusForbidden,
+				ErrorText:      domain.ErrNotAuthorized.Error(),
+			})
+			return
+		}
+		adminId, err := h.services.AdminAuth.AdminIdentity(splitToken[1])
+		if err != nil {
+			logger.Errorf("error in authenticating user %v", err)
+			render.Render(w, r, &ErrResponse{
+				HTTPStatusCode: http.StatusForbidden,
+				ErrorText:      domain.ErrNotAuthorized.Error(),
+			})
+			return
+		}
+		ctx := context.WithValue(r.Context(), userCtx{}, adminId)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}

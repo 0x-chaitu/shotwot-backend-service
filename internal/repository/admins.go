@@ -11,29 +11,25 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type UsersRepo struct {
+type AdminsRepo struct {
 	db *mongo.Collection
 }
 
-func NewUsersRepo(db *mongo.Database) *UsersRepo {
-	return &UsersRepo{
-		db: db.Collection("Users"),
+func NewAdminsRepo(db *mongo.Database) *AdminsRepo {
+	return &AdminsRepo{
+		db: db.Collection("Admins"),
 	}
 }
 
-func (r *UsersRepo) Create(ctx context.Context, user *domain.User) error {
-	_, err := r.db.InsertOne(ctx, user)
+func (r *AdminsRepo) Create(ctx context.Context, admin *domain.Admin) error {
+	_, err := r.db.InsertOne(ctx, admin)
 	if mongodb.IsDuplicate(err) {
 		return domain.ErrAccountAlreadyExists
 	}
 	return nil
 }
 
-func (r *UsersRepo) GetByCredentials(ctx context.Context, userIdentifier, password string) (domain.User, error) {
-	return domain.User{}, nil
-}
-
-func (r *UsersRepo) Update(ctx context.Context, user *domain.User) (*domain.User, error) {
+func (r *AdminsRepo) Update(ctx context.Context, user *domain.User) (*domain.User, error) {
 	update := bson.M{
 		"$set": user,
 	}
@@ -72,7 +68,7 @@ func (r *UsersRepo) Update(ctx context.Context, user *domain.User) (*domain.User
 	return &updatedUser, decodeErr
 }
 
-func (r *UsersRepo) Get(ctx context.Context, id string) (*domain.User, error) {
+func (r *AdminsRepo) Get(ctx context.Context, id string) (*domain.User, error) {
 	filter := bson.M{"_id": id}
 	result := r.db.FindOne(ctx, filter)
 	if err := handleSingleError(result); err != nil {

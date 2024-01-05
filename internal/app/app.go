@@ -37,6 +37,7 @@ func Run(configPath string) {
 
 	repos := repository.NewRepositories(db)
 	tokenManager, err := jwtauth.NewManager(cfg.Auth.JWT.SigningKey)
+	adminTokenManager, err := jwtauth.NewAdminManager(cfg.Auth.JWT.SigningKey)
 	if err != nil {
 		logger.Error(err)
 		return
@@ -48,11 +49,12 @@ func Run(configPath string) {
 	}
 	services := service.NewServices(
 		service.Deps{
-			Repos:           repos,
-			TokenManager:    tokenManager,
-			AccessTokenTTL:  cfg.Auth.JWT.AccessTokenTTL,
-			RefreshTokenTTL: cfg.Auth.JWT.RefreshTokenTTL,
-			AuthClient:      authClient,
+			Repos:             repos,
+			TokenManager:      tokenManager,
+			AdminTokenManager: adminTokenManager,
+			AccessTokenTTL:    cfg.Auth.JWT.AccessTokenTTL,
+			RefreshTokenTTL:   cfg.Auth.JWT.RefreshTokenTTL,
+			AuthClient:        authClient,
 		})
 	handlers := delivery.NewHandler(services)
 

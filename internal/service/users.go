@@ -56,13 +56,7 @@ func (s *UsersService) SignUp(ctx context.Context, input string) (*Tokens, error
 		Created: time.Now(),
 	}
 
-	//  email, err := s.firebaseAuthClient.EmailVerificationLink(ctx, input.Email)
-	// 	if err != nil {
-	// 		logger.Errorf("error generating email link: %v\n", err)
-	// 		return nil, err
-	// 	}
-
-	_, err = s.repo.Create(ctx, account)
+	err = s.repo.Create(ctx, account)
 	if err != nil {
 		return nil, err
 	}
