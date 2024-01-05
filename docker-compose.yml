@@ -1,0 +1,34 @@
+version: '3.4'
+
+services:
+  # app:
+  #   image: creatly-backend-app
+  #   container_name: creatly-backend-app
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - 8000:8000
+  #   depends_on:
+  #     - mongodb
+  #   volumes:
+  #     - ./.bin/:/root/
+  #     - ./configs/:/root/configs/
+  #     - ./templates/:/root/templates/
+  #   env_file:
+  #     - .env
+
+  debug:
+    image: creatly-backend-debug
+    container_name: creatly-backend-debug
+    build:
+      context: .
+      dockerfile: Dockerfile.debug
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./.bin/:/root/
+      - ./configs/:/root/configs/
+      - ./templates/:/root/templates/
+    env_file:
+      - .env
