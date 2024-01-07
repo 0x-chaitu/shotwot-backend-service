@@ -13,6 +13,7 @@ type AccountAuthInput struct {
 	Password string `json:"password"`
 	Email    string `json:"email"`
 	IdToken  string `json:"idToken"`
+	Role     int    `json:"role"`
 }
 
 type Tokens struct {
@@ -21,7 +22,7 @@ type Tokens struct {
 }
 
 type Users interface {
-	SignUp(ctx context.Context, input string) (*Tokens, error)
+	SignUp(ctx context.Context, input AccountAuthInput) (*Tokens, error)
 	SignIn(ctx context.Context, input AccountAuthInput) (*Tokens, error)
 	Update(ctx context.Context, input *domain.User) (*domain.User, error)
 	GetUser(ctx context.Context, id string) (*domain.User, error)
@@ -31,9 +32,9 @@ type Users interface {
 }
 
 type Admins interface {
-	// SignUp(ctx context.Context, input string) (*Tokens, error)
+	CreateAdmin(ctx context.Context, input AccountAuthInput) error
 	SignIn(ctx context.Context, input AccountAuthInput) (*Tokens, error)
-	// Update(ctx context.Context, input *domain.User) (*domain.User, error)
+	Update(ctx context.Context, input *domain.Admin) (*domain.Admin, error)
 	// GetUser(ctx context.Context, id string) (*domain.User, error)
 	// Delete(ctx context.Context, id string) error
 	// RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error)
@@ -69,10 +70,14 @@ type Deps struct {
 
 func NewServices(deps Deps) *Services {
 	userService := NewUsersService(deps.Repos.Users, deps.TokenManager, deps.AccessTokenTTL, deps.RefreshTokenTTL, deps.AuthClient)
+	adminService := NewAdminsService(deps.Repos.Admins, deps.AdminTokenManager, deps.AccessTokenTTL, deps.RefreshTokenTTL, deps.AuthClient)
+
 	authService := NewAuthService(deps.TokenManager)
 	adminAuthService := NewAdminAuthService(deps.AdminTokenManager)
 	return &Services{
-		Users:     userService,
+		Users:  userService,
+		Admins: adminService,
+
 		Auth:      authService,
 		AdminAuth: adminAuthService,
 	}

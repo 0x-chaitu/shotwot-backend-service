@@ -9,6 +9,12 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
+const (
+	SuperAdmin = iota
+	Admin
+	Curator
+)
+
 // TokenManager provides logic for JWT & Refresh tokens generation and parsing.
 type TokenManager interface {
 	NewJWT(userId string, ttl time.Duration) (string, error)
@@ -16,7 +22,7 @@ type TokenManager interface {
 }
 
 type AdminTokenManager interface {
-	NewJWT(userId string, ttl time.Duration) (string, error)
+	NewJWT(userId string, ttl time.Duration, role int) (string, error)
 	Parse(accessToken string) (*CustomAdminClaims, error)
 }
 
@@ -91,16 +97,16 @@ func NewAdminManager(signingKey string) (*AdminManager, error) {
 }
 
 type CustomAdminClaims struct {
-	IsAdmin bool
-	Subject string
+	AdminRole int
+	Subject   string
 }
 
-func (m *AdminManager) NewJWT(userId string, ttl time.Duration) (string, error) {
+func (m *AdminManager) NewJWT(userId string, ttl time.Duration, role int) (string, error) {
 	claims := &jwt.MapClaims{
 		"exp": time.Now().Add(ttl).Unix(),
 		"data": CustomAdminClaims{
-			IsAdmin: true,
-			Subject: userId,
+			AdminRole: role,
+			Subject:   userId,
 		},
 	}
 

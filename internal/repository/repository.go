@@ -16,7 +16,7 @@ type Users interface {
 }
 
 type Admins interface {
-	Create(ctx context.Context, admin *domain.Admin) (*domain.Admin, error)
+	Create(ctx context.Context, admin *domain.Admin) error
 
 	Update(ctx context.Context, admin *domain.Admin) (*domain.Admin, error)
 
@@ -30,6 +30,7 @@ type Repositories struct {
 
 func NewRepositories(db *mongo.Database) *Repositories {
 	return &Repositories{
-		Users: NewUsersRepo(db),
+		Users:  NewUsersRepo(db),
+		Admins: NewAdminsRepo(db),
 	}
 }

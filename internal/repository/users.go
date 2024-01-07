@@ -2,9 +2,9 @@ package repository
 
 import (
 	"context"
-	"errors"
 	"shotwot_backend/internal/domain"
 	"shotwot_backend/pkg/database/mongodb"
+	"shotwot_backend/pkg/helper"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -17,7 +17,7 @@ type UsersRepo struct {
 
 func NewUsersRepo(db *mongo.Database) *UsersRepo {
 	return &UsersRepo{
-		db: db.Collection("Users"),
+		db: db.Collection("user"),
 	}
 }
 
@@ -34,41 +34,25 @@ func (r *UsersRepo) GetByCredentials(ctx context.Context, userIdentifier, passwo
 }
 
 func (r *UsersRepo) Update(ctx context.Context, user *domain.User) (*domain.User, error) {
-	update := bson.M{
-		"$set": user,
-	}
 	filter := bson.M{"_id": user.Id}
-	//get user details before update query
-	result := r.db.FindOne(ctx, filter)
-	if err := handleSingleError(result); err != nil {
+
+	result, err := helper.TODoc(user)
+	if err != nil {
 		return nil, err
 	}
-	getUser := domain.User{}
-	decodeErr := result.Decode(&getUser)
-	if decodeErr != nil {
-		return nil, decodeErr
+	update := bson.M{
+		"$set": result,
 	}
-
-	if getUser.Email != user.Email {
-		return nil, errors.New("user email invalid")
-	} else if getUser.Pro != user.Pro {
-		return nil, errors.New("user action invalid")
-	} else if getUser.Created != user.Created {
-		return nil, errors.New("user action invalid")
-	} else if getUser.ProfileImage != user.ProfileImage {
-		return nil, errors.New("user action invalid")
-	}
-
 	after := options.After
 	opt := options.FindOneAndUpdateOptions{
 		ReturnDocument: &after,
 	}
 	updatedResult := r.db.FindOneAndUpdate(ctx, filter, update, &opt)
-	if err := handleSingleError(result); err != nil {
+	if err := handleSingleError(updatedResult); err != nil {
 		return nil, err
 	}
 	updatedUser := domain.User{}
-	decodeErr = updatedResult.Decode(&updatedUser)
+	decodeErr := updatedResult.Decode(&updatedUser)
 	return &updatedUser, decodeErr
 }
 

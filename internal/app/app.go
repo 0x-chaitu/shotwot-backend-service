@@ -27,7 +27,7 @@ func Run(configPath string) {
 		return
 	}
 
-	mongoClient, err := mongodb.NewClient("mongodb+srv://chaitu:chaitu@cluster0.4cmhaeu.mongodb.net/?retryWrites=true&w=majority")
+	mongoClient, err := mongodb.NewClient("mongodb+srv://goshotwot:Tokyo.3619@shotwottest.rpgjdmf.mongodb.net/?retryWrites=true&w=majority")
 	if err != nil {
 		logger.Error(err)
 		return
@@ -37,6 +37,10 @@ func Run(configPath string) {
 
 	repos := repository.NewRepositories(db)
 	tokenManager, err := jwtauth.NewManager(cfg.Auth.JWT.SigningKey)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
 	adminTokenManager, err := jwtauth.NewAdminManager(cfg.Auth.JWT.SigningKey)
 	if err != nil {
 		logger.Error(err)

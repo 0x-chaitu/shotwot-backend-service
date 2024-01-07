@@ -2,9 +2,10 @@ package repository
 
 import (
 	"context"
-	"errors"
 	"shotwot_backend/internal/domain"
 	"shotwot_backend/pkg/database/mongodb"
+	"shotwot_backend/pkg/helper"
+	"shotwot_backend/pkg/logger"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -17,7 +18,7 @@ type AdminsRepo struct {
 
 func NewAdminsRepo(db *mongo.Database) *AdminsRepo {
 	return &AdminsRepo{
-		db: db.Collection("Admins"),
+		db: db.Collection("admin"),
 	}
 }
 
@@ -29,52 +30,37 @@ func (r *AdminsRepo) Create(ctx context.Context, admin *domain.Admin) error {
 	return nil
 }
 
-func (r *AdminsRepo) Update(ctx context.Context, user *domain.User) (*domain.User, error) {
+func (r *AdminsRepo) Update(ctx context.Context, admin *domain.Admin) (*domain.Admin, error) {
+	result, err := helper.TODoc(admin)
 	update := bson.M{
-		"$set": user,
+		"$set": result,
 	}
-	filter := bson.M{"_id": user.Id}
-	//get user details before update query
-	result := r.db.FindOne(ctx, filter)
-	if err := handleSingleError(result); err != nil {
+	if err != nil {
 		return nil, err
 	}
-	getUser := domain.User{}
-	decodeErr := result.Decode(&getUser)
-	if decodeErr != nil {
-		return nil, decodeErr
-	}
-
-	if getUser.Email != user.Email {
-		return nil, errors.New("user email invalid")
-	} else if getUser.Pro != user.Pro {
-		return nil, errors.New("user action invalid")
-	} else if getUser.Created != user.Created {
-		return nil, errors.New("user action invalid")
-	} else if getUser.ProfileImage != user.ProfileImage {
-		return nil, errors.New("user action invalid")
-	}
+	filter := bson.M{"_id": admin.Id}
 
 	after := options.After
 	opt := options.FindOneAndUpdateOptions{
 		ReturnDocument: &after,
 	}
 	updatedResult := r.db.FindOneAndUpdate(ctx, filter, update, &opt)
-	if err := handleSingleError(result); err != nil {
+	if err := handleSingleError(updatedResult); err != nil {
 		return nil, err
 	}
-	updatedUser := domain.User{}
-	decodeErr = updatedResult.Decode(&updatedUser)
-	return &updatedUser, decodeErr
+	updatedadmin := domain.Admin{}
+	decodeErr := updatedResult.Decode(&updatedadmin)
+	return &updatedadmin, decodeErr
 }
 
-func (r *AdminsRepo) Get(ctx context.Context, id string) (*domain.User, error) {
-	filter := bson.M{"_id": id}
+func (r *AdminsRepo) Get(ctx context.Context, id string) (*domain.Admin, error) {
+	filter := bson.M{"_id": "Ze0EvtlUPmb8H3tYtkuK1sTDpgU2"}
 	result := r.db.FindOne(ctx, filter)
 	if err := handleSingleError(result); err != nil {
+		logger.Error(err)
 		return nil, err
 	}
-	user := domain.User{}
-	decodeErr := result.Decode(&user)
-	return &user, decodeErr
+	admin := domain.Admin{}
+	decodeErr := result.Decode(&admin)
+	return &admin, decodeErr
 }

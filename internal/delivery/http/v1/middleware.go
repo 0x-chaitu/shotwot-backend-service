@@ -15,6 +15,7 @@ const (
 )
 
 type userCtx struct{}
+type adminCtx struct{}
 
 func (h *Handler) parseUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -63,7 +64,7 @@ func (h *Handler) parseAdmin(next http.Handler) http.Handler {
 			})
 			return
 		}
-		ctx := context.WithValue(r.Context(), userCtx{}, adminId)
+		ctx := context.WithValue(r.Context(), adminCtx{}, adminId)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

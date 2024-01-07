@@ -14,17 +14,18 @@ import (
 )
 
 type User struct {
-	Id           string    `bson:"_id" json:"id"`
-	FirstName    string    `bson:"firstname" json:"firstname"`
-	LastName     string    `bson:"lastname" json:"lastname"`
-	Email        string    `bson:"email" json:"email" `
+	Id           string    `bson:"_id,omitempty" json:"id,omitempty"`
+	UserName     string    `bson:"username,omitempty" json:"username,omitempty"`
+	FirstName    string    `bson:"firstname,omitempty" json:"firstname,omitempty"`
+	LastName     string    `bson:"lastname,omitempty" json:"lastname,omitempty"`
+	Email        string    `bson:"email,omitempty" json:"email,omitempty" `
 	Mobile       string    `bson:"mobile" json:"mobile"`
 	ShowReel     string    `bson:"showreel" json:"showreel"`
 	ProfileImage string    `bson:"profileimage" json:"profileimage"`
 	Bio          string    `bson:"bio" json:"bio"`
 	Address      Address   `bson:"address" json:"address"`
-	Pro          bool      `bson:"pro" json:"pro"`
-	Created      time.Time `bson:"created" json:"created"`
+	Pro          bool      `bson:"pro,omitempty" json:"pro,omitempty"`
+	Created      time.Time `bson:"created,omitempty" json:"created,omitempty"`
 }
 
 // Render for All Responses
@@ -34,9 +35,7 @@ func (u *User) Render(w http.ResponseWriter, r *http.Request) error {
 
 func (u *User) Validate() error {
 	return validation.ValidateStruct(&u,
-		validation.Field(&u.FirstName, validation.Required, validation.Length(3, 126)),
-		validation.Field(&u.Email, validation.Required, is.Email),
-		validation.Field(&u.LastName, validation.Required, validation.Length(3, 126)),
+		validation.Field(&u.Email, validation.NotNil.Error("invalid input")),
 	)
 }
 

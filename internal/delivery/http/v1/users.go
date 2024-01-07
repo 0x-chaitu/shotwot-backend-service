@@ -39,7 +39,7 @@ func (h *Handler) userSignUp(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	tokens, err := h.services.Users.SignUp(r.Context(), inp.IdToken)
+	tokens, err := h.services.Users.SignUp(r.Context(), inp)
 	if err != nil {
 		if errors.Is(err, domain.ErrAccountAlreadyExists) {
 			render.Render(w, r, &ErrResponse{

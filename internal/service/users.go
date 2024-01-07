@@ -41,8 +41,8 @@ func NewUsersService(repo repository.Users, tokenManager jwtauth.TokenManager, a
 	}
 }
 
-func (s *UsersService) SignUp(ctx context.Context, input string) (*Tokens, error) {
-	token, err := s.firebaseAuthClient.VerifyIDToken(ctx, input)
+func (s *UsersService) SignUp(ctx context.Context, input AccountAuthInput) (*Tokens, error) {
+	token, err := s.firebaseAuthClient.VerifyIDToken(ctx, input.IdToken)
 	if err != nil {
 		if fireauth.IsEmailAlreadyExists(err) {
 			return nil, domain.ErrAccountAlreadyExists
@@ -74,9 +74,6 @@ func (s *UsersService) SignIn(ctx context.Context, input AccountAuthInput) (*Tok
 }
 
 func (s *UsersService) Update(ctx context.Context, input *domain.User) (*domain.User, error) {
-	if err := input.Validate(); err != nil {
-		return nil, domain.ErrInvalidInput
-	}
 	user, err := s.repo.Update(ctx, input)
 	if err != nil {
 		logger.Error(err)
