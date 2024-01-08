@@ -87,6 +87,10 @@ func (a *AdminsService) Update(ctx context.Context, admin *domain.Admin) (*domai
 
 }
 
+func (a *AdminsService) Delete(ctx context.Context, id string) error {
+	return a.firebaseAuthClient.DeleteUser(ctx, id)
+}
+
 func (s *AdminsService) createAdminSession(ctx context.Context, adminId string, role int) (*Tokens, error) {
 	token, err := s.tokenManager.NewJWT(fmt.Sprint(adminId), s.accessTokenTTL, role)
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"shotwot_backend/internal/repository"
 	jwtauth "shotwot_backend/pkg/auth"
 	"shotwot_backend/pkg/firebase"
+	"shotwot_backend/pkg/helper"
 	"time"
 )
 
@@ -36,9 +37,15 @@ type Admins interface {
 	SignIn(ctx context.Context, input AccountAuthInput) (*Tokens, error)
 	Update(ctx context.Context, input *domain.Admin) (*domain.Admin, error)
 	// GetUser(ctx context.Context, id string) (*domain.User, error)
-	// Delete(ctx context.Context, id string) error
+	Delete(ctx context.Context, id string) error
 	// RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error)
 	// Verify(ctx context.Context, userID primitive.ObjectID, hash string) error
+}
+
+type Briefs interface {
+	Create(ctx context.Context, input *domain.Brief) error
+
+	GetBriefs(ctx context.Context, predicate *helper.Predicate) ([]*domain.Brief, error)
 }
 
 type Auth interface {
@@ -52,6 +59,8 @@ type AdminAuth interface {
 type Services struct {
 	Users  Users
 	Admins Admins
+
+	Briefs Briefs
 
 	Auth      Auth
 	AdminAuth AdminAuth
@@ -72,11 +81,14 @@ func NewServices(deps Deps) *Services {
 	userService := NewUsersService(deps.Repos.Users, deps.TokenManager, deps.AccessTokenTTL, deps.RefreshTokenTTL, deps.AuthClient)
 	adminService := NewAdminsService(deps.Repos.Admins, deps.AdminTokenManager, deps.AccessTokenTTL, deps.RefreshTokenTTL, deps.AuthClient)
 
+	briefService := NewBriefsService(deps.Repos.Briefs)
+
 	authService := NewAuthService(deps.TokenManager)
 	adminAuthService := NewAdminAuthService(deps.AdminTokenManager)
 	return &Services{
 		Users:  userService,
 		Admins: adminService,
+		Briefs: briefService,
 
 		Auth:      authService,
 		AdminAuth: adminAuthService,

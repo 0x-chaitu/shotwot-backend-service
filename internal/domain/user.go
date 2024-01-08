@@ -16,8 +16,8 @@ import (
 type User struct {
 	Id           string    `bson:"_id,omitempty" json:"id,omitempty"`
 	UserName     string    `bson:"username,omitempty" json:"username,omitempty"`
-	FirstName    string    `bson:"firstname,omitempty" json:"firstname,omitempty"`
-	LastName     string    `bson:"lastname,omitempty" json:"lastname,omitempty"`
+	FirstName    string    `bson:"firstname" json:"firstname"`
+	LastName     string    `bson:"lastname" json:"lastname"`
 	Email        string    `bson:"email,omitempty" json:"email,omitempty" `
 	Mobile       string    `bson:"mobile" json:"mobile"`
 	ShowReel     string    `bson:"showreel" json:"showreel"`

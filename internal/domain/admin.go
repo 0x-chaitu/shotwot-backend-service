@@ -7,7 +7,7 @@ import (
 
 type Admin struct {
 	Id        string    `bson:"_id,omitempty" json:"id,omitempty"`
-	FirstName string    `bson:"firstname,omitempty" json:"firstname,omitempty"`
+	FirstName string    `bson:"firstname" json:"firstname"`
 	LastName  string    `bson:"lastname" json:"lastname"`
 	Email     string    `bson:"email,omitempty" json:"email,omitempty" `
 	Mobile    string    `bson:"mobile" json:"mobile"`

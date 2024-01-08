@@ -19,15 +19,15 @@ func (h *Handler) initAdminRoutes() http.Handler {
 	r.Post("/signin", h.adminSignIn)
 	r.Route("/", func(r chi.Router) {
 		r.Use(h.parseAdmin)
-		r.Post("/create", h.createBySuperAdmin)
+		r.Post("/create", h.createAdmin)
 		r.Put("/update", h.adminUpdate)
-		r.Delete("/delete", h.deleteUser)
+		r.Delete("/delete", h.deleteAdmin)
 	})
 	return r
 
 }
 
-func (h *Handler) createBySuperAdmin(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) createAdmin(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	adminIdentity := ctx.Value(adminCtx{}).(*jwtauth.CustomAdminClaims)
 	if adminIdentity.AdminRole != jwtauth.SuperAdmin {
@@ -141,22 +141,30 @@ func (h *Handler) adminUpdate(w http.ResponseWriter, r *http.Request) {
 // 	render.Render(w, r, user)
 // }
 
-// func (h *Handler) deleteUser(w http.ResponseWriter, r *http.Request) {
-// 	ctx := r.Context()
-// 	userIdentity := ctx.Value(userCtx{}).(*jwtauth.CustomClaims)
-// 	id := userIdentity.Subject
-// 	err := h.services.Users.Delete(ctx, id)
-// 	if err != nil {
-// 		render.Render(w, r, &ErrResponse{
-// 			HTTPStatusCode: http.StatusBadRequest,
-// 			ErrorText:      err.Error(),
-// 		})
-// 		return
-// 	}
+func (h *Handler) deleteAdmin(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	adminIdentity := ctx.Value(adminCtx{}).(*jwtauth.CustomAdminClaims)
+	id := adminIdentity.Subject
+	role := adminIdentity.AdminRole
+	if !(role == jwtauth.Admin || role == jwtauth.SuperAdmin) {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      "action not permitted",
+		})
+		return
+	}
+	err := h.services.Admins.Delete(ctx, id)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
 
-// 	render.Status(r, http.StatusOK)
-// 	render.Render(w, r, &AppResponse{
-// 		HTTPStatusCode: http.StatusOK,
-// 		SuccessText:    "user deleted successfully",
-// 	})
-// }
+	render.Status(r, http.StatusOK)
+	render.Render(w, r, &AppResponse{
+		HTTPStatusCode: http.StatusOK,
+		SuccessText:    "user deleted successfully",
+	})
+}
