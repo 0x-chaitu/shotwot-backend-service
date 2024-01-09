@@ -25,13 +25,15 @@ type Admins interface {
 }
 
 type Briefs interface {
-	Create(ctx context.Context, brief *domain.Brief) error
+	Create(ctx context.Context, brief *domain.Brief) (*domain.Brief, error)
 
-	Update(ctx context.Context, user *domain.Brief) (*domain.Brief, error)
+	Update(ctx context.Context, brief *domain.Brief) (*domain.Brief, error)
 
 	Get(ctx context.Context, id string) (*domain.Brief, error)
 
 	GetBriefs(ctx context.Context, predicate *helper.Predicate) ([]*domain.Brief, error)
+
+	DeleteBrief(ctx context.Context, id string) error
 }
 
 type Repositories struct {

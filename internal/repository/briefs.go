@@ -6,6 +6,7 @@ import (
 	"shotwot_backend/pkg/helper"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -20,12 +21,13 @@ func NewBriefsRepo(db *mongo.Database) *BriefsRepo {
 	}
 }
 
-func (r *BriefsRepo) Create(ctx context.Context, brief *domain.Brief) error {
-	_, err := r.db.InsertOne(ctx, brief)
+func (r *BriefsRepo) Create(ctx context.Context, brief *domain.Brief) (*domain.Brief, error) {
+	result, err := r.db.InsertOne(ctx, brief)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	brief.Id = result.InsertedID.(primitive.ObjectID)
+	return brief, nil
 }
 
 func (r *BriefsRepo) GetBriefs(ctx context.Context, predicate *helper.Predicate) ([]*domain.Brief, error) {
@@ -35,11 +37,15 @@ func (r *BriefsRepo) GetBriefs(ctx context.Context, predicate *helper.Predicate)
 	} else {
 		cond = "$lt"
 	}
-	filter := bson.D{{Key: "created", Value: bson.D{
-		{Key: cond, Value: predicate.ByDate}}},
-		{Key: "is_active", Value: predicate.IsActive},
+	var filter primitive.D
+	if predicate.CreatedBy != "" {
+		filter = append(filter, bson.E{Key: "createdby", Value: predicate.CreatedBy})
 	}
-
+	filter = append(filter, bson.E{Key: "is_active", Value: predicate.IsActive})
+	if predicate.ByDate != "" {
+		filter = append(filter, bson.E{Key: "created", Value: bson.D{
+			{Key: cond, Value: predicate.ByDate}}})
+	}
 	opts := options.Find().SetSort(bson.D{{Key: "created", Value: predicate.Order}})
 	opts.SetLimit(int64(predicate.Limit))
 	cursor, err := r.db.Find(ctx, filter, opts)
@@ -57,10 +63,10 @@ func (r *BriefsRepo) GetBriefs(ctx context.Context, predicate *helper.Predicate)
 	return results, nil
 }
 
-func (r *BriefsRepo) Update(ctx context.Context, user *domain.Brief) (*domain.Brief, error) {
-	filter := bson.M{"_id": user.Id}
+func (r *BriefsRepo) Update(ctx context.Context, brief *domain.Brief) (*domain.Brief, error) {
+	filter := bson.M{"_id": brief.Id}
 
-	result, err := helper.TODoc(user)
+	result, err := helper.TODoc(brief)
 	if err != nil {
 		return nil, err
 	}
@@ -75,9 +81,9 @@ func (r *BriefsRepo) Update(ctx context.Context, user *domain.Brief) (*domain.Br
 	if err := handleSingleError(updatedResult); err != nil {
 		return nil, err
 	}
-	updatedUser := domain.User{}
-	decodeErr := updatedResult.Decode(&updatedUser)
-	return nil, decodeErr
+	updatedBrief := domain.Brief{}
+	decodeErr := updatedResult.Decode(&updatedBrief)
+	return &updatedBrief, decodeErr
 }
 
 func (r *BriefsRepo) Get(ctx context.Context, id string) (*domain.Brief, error) {
@@ -89,4 +95,17 @@ func (r *BriefsRepo) Get(ctx context.Context, id string) (*domain.Brief, error) 
 	user := domain.User{}
 	decodeErr := result.Decode(&user)
 	return nil, decodeErr
+}
+
+func (r *BriefsRepo) DeleteBrief(ctx context.Context, id string) error {
+	briedId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	filter := bson.M{"_id": briedId}
+	res := r.db.FindOneAndDelete(ctx, filter)
+	if res.Err() != nil {
+		return res.Err()
+	}
+	return nil
 }

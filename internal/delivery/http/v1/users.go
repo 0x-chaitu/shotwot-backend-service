@@ -149,6 +149,6 @@ func (h *Handler) deleteUser(w http.ResponseWriter, r *http.Request) {
 	render.Status(r, http.StatusOK)
 	render.Render(w, r, &AppResponse{
 		HTTPStatusCode: http.StatusOK,
-		SuccessText:    "user deleted successfully",
+		Success:        true,
 	})
 }

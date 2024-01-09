@@ -26,6 +26,7 @@ type ErrResponse struct {
 	Err            error `json:"-"` // low-level runtime error
 	HTTPStatusCode int   `json:"-"` // http response status code
 
+	Success   bool   `json:"success"`
 	AppCode   int64  `json:"status,omitempty"` // application-specific error code
 	ErrorText string `json:"error,omitempty"`  // application-level error message, for debugging
 }
@@ -33,9 +34,9 @@ type ErrResponse struct {
 type AppResponse struct {
 	HTTPStatusCode int `json:"-"` // http response status code
 
-	AppCode     int64       `json:"status,omitempty"`  // application-specific error code
-	SuccessText string      `json:"success,omitempty"` // application-level error message, for debugging
-	Data        interface{} `json:"data,omitempty"`
+	AppCode int64       `json:"status,omitempty"` // application-specific error code
+	Success bool        `json:"success"`          // application-level error message, for debugging
+	Data    interface{} `json:"data,omitempty"`
 }
 
 func (e *AppResponse) Render(w http.ResponseWriter, r *http.Request) error {
@@ -58,7 +59,6 @@ func (h *Handler) Init() http.Handler {
 	r := chi.NewRouter()
 	r.Mount("/users", h.initUsersRoutes())
 	r.Mount("/admin", h.initAdminRoutes())
-	r.Mount("/brief", h.initBriefsRoutes())
 
 	return r
 }

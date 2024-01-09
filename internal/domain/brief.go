@@ -17,8 +17,8 @@ type Brief struct {
 	IsActive  bool `bson:"is_active" json:"is_active"`
 	Archieved bool `bson:"archieved" json:"archieved"`
 
-	ActivatedOn time.Time `bson:"activated_on,omitempty" json:"activatedOn,omitempty"`
-	DeactivedOn time.Time `bson:"deactivated_on,omitempty" json:"deactivatedOn,omitempty"`
+	ActivatedOn *time.Time `bson:"activated_on,omitempty" json:"activatedOn,omitempty"`
+	DeactivedOn *time.Time `bson:"deactivated_on,omitempty" json:"deactivatedOn,omitempty"`
 
 	// timelapse, adventure, abstract
 	Category string `bson:"category" json:"category"`

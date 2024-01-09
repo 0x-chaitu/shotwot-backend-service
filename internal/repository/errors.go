@@ -8,7 +8,7 @@ import (
 
 func handleSingleError(result *mongo.SingleResult) error {
 	if mongo.ErrNoDocuments == result.Err() {
-		return domain.ErrAccountNotFound
+		return domain.ErrNotFound
 	} else if result.Err() != nil {
 		return result.Err()
 	}

@@ -22,6 +22,8 @@ func (h *Handler) initAdminRoutes() http.Handler {
 		r.Post("/create", h.createAdmin)
 		r.Put("/update", h.adminUpdate)
 		r.Delete("/delete", h.deleteAdmin)
+		r.Mount("/brief", h.initBriefsRoutes())
+
 	})
 	return r
 
@@ -71,7 +73,7 @@ func (h *Handler) createAdmin(w http.ResponseWriter, r *http.Request) {
 	}
 	render.Render(w, r, &AppResponse{
 		HTTPStatusCode: http.StatusOK,
-		SuccessText:    "user created",
+		Success:        true,
 	})
 }
 
@@ -165,6 +167,6 @@ func (h *Handler) deleteAdmin(w http.ResponseWriter, r *http.Request) {
 	render.Status(r, http.StatusOK)
 	render.Render(w, r, &AppResponse{
 		HTTPStatusCode: http.StatusOK,
-		SuccessText:    "user deleted successfully",
+		Success:        true,
 	})
 }

@@ -79,7 +79,6 @@ func (s *UsersService) Update(ctx context.Context, input *domain.User) (*domain.
 		logger.Error(err)
 		return nil, err
 	}
-	logger.Info(user)
 	return user, nil
 }
 
