@@ -27,16 +27,15 @@ jobs:
       - name: Build app
         run: go build -o main
 
-      - name: Copy Go App to Ec2
-        uses: appleboy/scp-action@master
+      - name: ssh deploy
+        uses: easingthemes/ssh-deploy@v5.0.0
         with:
-          host: backendtest.shotwot.com
-          username: ubuntu
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: shotwotTest
-          target: /root/shotwot
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SOURCE: "./main"
+          REMOTE_HOST: "ec2-3-109-214-217.ap-south-1.compute.amazonaws.com"
+          REMOTE_USER: "ubuntu"
 
       - name: Restart Go App Service
-        run: ssh ubuntu@ec2-3-109-214-217.ap-south-1.compute.amazonaws.com "systemctl restart shotwotTest"
+        run: ssh -i ${{ secrets.SSH_PRIVATE_KEY }} ubuntu@ec2-3-109-214-217.ap-south-1.compute.amazonaws.com "systemctl restart shotwotTest"
     
 
