@@ -8,6 +8,8 @@ import (
 	"shotwot_backend/pkg/firebase"
 	"shotwot_backend/pkg/helper"
 	"time"
+
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
 type AccountAuthInput struct {
@@ -79,6 +81,8 @@ type Deps struct {
 	RefreshTokenTTL time.Duration
 
 	AuthClient *firebase.AuthClient
+
+	WasabiS3Client *s3.Client
 }
 
 func NewServices(deps Deps) *Services {

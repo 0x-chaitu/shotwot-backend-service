@@ -1,0 +1,42 @@
+
+name: Push-to-EC2
+
+on: 
+  push:
+    branches: [ develop ]
+
+jobs:
+  deploy:
+    name: Push to EC2 Instance
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.21.3'
+
+      - name: Install dependencies
+        run: | 
+          go get .
+          go version 
+          go get -u golang.org/x/lint/golint
+
+      - name: Build app
+        run: go build -o main
+
+      - name: Copy Go App to Ec2
+        uses: appleboy/scp-action@master
+        with:
+          host: backendtest.shotwot.com
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: shotwotTest
+          target: /root/shotwot
+
+      - name: Restart Go App Service
+        run: ssh ubuntu@ec2-3-109-214-217.ap-south-1.compute.amazonaws.com "systemctl restart shotwotTest"
+    
+
