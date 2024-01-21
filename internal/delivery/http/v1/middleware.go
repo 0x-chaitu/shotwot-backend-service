@@ -55,6 +55,7 @@ func (h *Handler) parseAdmin(next http.Handler) http.Handler {
 			})
 			return
 		}
+		logger.Info(splitToken[1])
 		adminId, err := h.services.AdminAuth.AdminIdentity(splitToken[1])
 		if err != nil {
 			logger.Errorf("error in authenticating user %v", err)

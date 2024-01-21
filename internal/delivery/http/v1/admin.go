@@ -21,6 +21,7 @@ func (h *Handler) initAdminRoutes() http.Handler {
 		r.Use(h.parseAdmin)
 		r.Post("/create", h.createAdmin)
 		r.Put("/update", h.adminUpdate)
+		r.Get("/getall", h.getAllAdmin)
 		r.Delete("/delete", h.deleteAdmin)
 		r.Mount("/brief", h.initBriefsRoutes())
 
@@ -129,19 +130,31 @@ func (h *Handler) adminUpdate(w http.ResponseWriter, r *http.Request) {
 	render.Render(w, r, updatedAdmin)
 }
 
-// func (h *Handler) getUser(w http.ResponseWriter, r *http.Request) {
-// 	id := chi.URLParam(r, "userId")
-// 	user, err := h.services.Users.GetUser(r.Context(), id)
-// 	if err != nil {
-// 		render.Render(w, r, &ErrResponse{
-// 			HTTPStatusCode: http.StatusBadRequest,
-// 			ErrorText:      err.Error(),
-// 		})
-// 		return
-// 	}
-// 	render.Status(r, http.StatusOK)
-// 	render.Render(w, r, user)
-// }
+func (h *Handler) getAllAdmin(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	adminIdentity := ctx.Value(adminCtx{}).(*jwtauth.CustomAdminClaims)
+	role := adminIdentity.AdminRole
+	if !(role == jwtauth.Admin || role == jwtauth.SuperAdmin) {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      "action not permitted",
+		})
+		return
+	}
+	adminList, err := h.services.Admins.GetAllAdmins(r.Context())
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusInternalServerError,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+	render.Render(w, r, &AppResponse{
+		HTTPStatusCode: http.StatusOK,
+		Success:        true,
+		Data:           adminList,
+	})
+}
 
 func (h *Handler) deleteAdmin(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()

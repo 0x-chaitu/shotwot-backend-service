@@ -1,6 +1,8 @@
 package main
 
-import "shotwot_backend/internal/app"
+import (
+	"shotwot_backend/internal/app"
+)
 
 const configsDir = "configs"
 

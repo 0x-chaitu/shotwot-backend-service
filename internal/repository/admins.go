@@ -8,6 +8,7 @@ import (
 	"shotwot_backend/pkg/logger"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -51,6 +52,27 @@ func (r *AdminsRepo) Update(ctx context.Context, admin *domain.Admin) (*domain.A
 	updatedadmin := domain.Admin{}
 	decodeErr := updatedResult.Decode(&updatedadmin)
 	return &updatedadmin, decodeErr
+}
+
+func (r *AdminsRepo) GetAdmins(ctx context.Context) ([]*domain.Admin, error) {
+	var filter primitive.D
+
+	opts := options.Find()
+	opts.SetLimit(int64(20))
+	cursor, err := r.db.Find(ctx, filter, opts)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+	cursor.SetBatchSize(20)
+
+	var results []*domain.Admin
+	if err = cursor.All(context.TODO(), &results); err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+
+	return nil, nil
 }
 
 func (r *AdminsRepo) Get(ctx context.Context, id string) (*domain.Admin, error) {

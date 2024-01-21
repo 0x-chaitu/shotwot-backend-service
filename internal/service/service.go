@@ -40,6 +40,9 @@ type Admins interface {
 	Update(ctx context.Context, input *domain.Admin) (*domain.Admin, error)
 	// GetUser(ctx context.Context, id string) (*domain.User, error)
 	Delete(ctx context.Context, id string) error
+
+	GetAllAdmins(ctx context.Context) ([]*domain.Admin, error)
+
 	// RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error)
 	// Verify(ctx context.Context, userID primitive.ObjectID, hash string) error
 }

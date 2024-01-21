@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"shotwot_backend/pkg/logger"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -124,6 +125,7 @@ func (m *AdminManager) Parse(accessToken string) (*CustomAdminClaims, error) {
 		return []byte(m.signingKey), nil
 	})
 	if err != nil {
+		logger.Error(err)
 		return nil, err
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
@@ -134,9 +136,11 @@ func (m *AdminManager) Parse(accessToken string) (*CustomAdminClaims, error) {
 	customClaims := CustomAdminClaims{}
 	jsonbody, err := json.Marshal(data)
 	if err != nil {
+		logger.Error(err)
 		return nil, err
 	}
 	if err := json.Unmarshal(jsonbody, &customClaims); err != nil {
+		logger.Error(err)
 		return nil, err
 	}
 	return &customClaims, nil
