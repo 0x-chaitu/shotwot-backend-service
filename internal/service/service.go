@@ -8,6 +8,8 @@ import (
 	"shotwot_backend/pkg/firebase"
 	"shotwot_backend/pkg/helper"
 	"time"
+
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
 type AccountAuthInput struct {
@@ -38,6 +40,9 @@ type Admins interface {
 	Update(ctx context.Context, input *domain.Admin) (*domain.Admin, error)
 	// GetUser(ctx context.Context, id string) (*domain.User, error)
 	Delete(ctx context.Context, id string) error
+
+	GetAllAdmins(ctx context.Context) ([]*domain.Admin, error)
+
 	// RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error)
 	// Verify(ctx context.Context, userID primitive.ObjectID, hash string) error
 }
@@ -79,6 +84,8 @@ type Deps struct {
 	RefreshTokenTTL time.Duration
 
 	AuthClient *firebase.AuthClient
+
+	WasabiS3Client *s3.Client
 }
 
 func NewServices(deps Deps) *Services {

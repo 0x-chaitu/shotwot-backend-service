@@ -46,6 +46,10 @@ func (a *AdminsService) SignIn(ctx context.Context, input AccountAuthInput) (*To
 	return a.createAdminSession(ctx, tokenId.UID, admin.Role)
 }
 
+func (a *AdminsService) GetAllAdmins(ctx context.Context) ([]*domain.Admin, error) {
+	return a.repo.GetAdmins(ctx)
+}
+
 func (a *AdminsService) CreateAdmin(ctx context.Context, input AccountAuthInput) error {
 	err := validation.ValidateStruct(&input,
 		validation.Field(&input.Password, validation.Required),

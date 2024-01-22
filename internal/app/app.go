@@ -15,15 +15,53 @@ import (
 	"shotwot_backend/pkg/database/mongodb"
 	"shotwot_backend/pkg/firebase"
 	"shotwot_backend/pkg/logger"
+	"shotwot_backend/pkg/s3"
 	"syscall"
 	"time"
 )
 
 func Run(configPath string) {
 	cfg, err := config.Init(configPath)
+
 	if err != nil {
 		logger.Error(err)
 
+		return
+	}
+
+	// sdkConfig, err := awsconfig.LoadDefaultConfig(context.Background(),
+	// 	awsconfig.WithRegion("eu-central-1"),
+	// 	awsconfig.WithCredentialsProvider(credentials.NewStaticCredentialsProvider("CYH4MC8ZAIQCNKXS0I9C", "T5ZBEVRccXndzP0wgkGPm2L1VcLHeeJVZr9WvJLD", "TOKEN")),
+	// )
+	// if err != nil {
+	// 	fmt.Println("Couldn't load default configuration. Have you set up your AWS account?")
+	// 	fmt.Println(err)
+	// }
+
+	// client := s3.NewFromConfig(sdkConfig, func(o *s3.Options) {
+	// 	o.BaseEndpoint = aws.String("https://s3.eu-central-1.wasabisys.com/")
+	// })
+
+	// x := s3.NewPresignClient(client)
+	// bucketName := "warehouse-test"
+	// objectKey := "warehouse.mp4"
+	// request, err := x.PresignPutObject(context.TODO(), &s3.PutObjectInput{
+	// 	Bucket:          aws.String(bucketName),
+	// 	Key:             aws.String(objectKey),
+	// 	ContentType:     aws.String("video/mp4"),
+	// 	ContentEncoding: aws.String("base64"),
+	// }, func(opts *s3.PresignOptions) {
+	// 	opts.Expires = time.Duration(100000 * int64(time.Second))
+	// })
+	// if err != nil {
+	// 	log.Printf("Couldn't get a presigned request to put %v:%v. Here's why: %v\n",
+	// 		bucketName, objectKey, err)
+	// }
+	// logger.Info(request)
+
+	wasabiS3Client, err := s3.NewWasabiBucket("")
+	if err != nil {
+		logger.Error(err)
 		return
 	}
 
@@ -59,6 +97,7 @@ func Run(configPath string) {
 			AccessTokenTTL:    cfg.Auth.JWT.AccessTokenTTL,
 			RefreshTokenTTL:   cfg.Auth.JWT.RefreshTokenTTL,
 			AuthClient:        authClient,
+			WasabiS3Client:    wasabiS3Client,
 		})
 	handlers := delivery.NewHandler(services)
 

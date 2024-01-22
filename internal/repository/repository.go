@@ -22,6 +22,8 @@ type Admins interface {
 	Update(ctx context.Context, admin *domain.Admin) (*domain.Admin, error)
 
 	Get(ctx context.Context, id string) (*domain.Admin, error)
+
+	GetAdmins(ctx context.Context) ([]*domain.Admin, error)
 }
 
 type Briefs interface {
