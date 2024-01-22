@@ -21,7 +21,7 @@ func (h *Handler) initAdminRoutes() http.Handler {
 		r.Use(h.parseAdmin)
 		r.Post("/create", h.createAdmin)
 		r.Put("/update", h.adminUpdate)
-		r.Get("/getall", h.getAllAdmin)
+		r.Get("/list", h.getAllAdmin)
 		r.Delete("/delete", h.deleteAdmin)
 		r.Mount("/brief", h.initBriefsRoutes())
 
