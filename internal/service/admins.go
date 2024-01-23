@@ -54,9 +54,10 @@ func (a *AdminsService) CreateAdmin(ctx context.Context, input AccountAuthInput)
 	err := validation.ValidateStruct(&input,
 		validation.Field(&input.Password, validation.Required),
 		validation.Field(&input.Email, validation.Required),
-		validation.Field(&input.Role, validation.Required),
+		validation.Field(&input.Role, validation.Required, validation.Max(4), validation.Min(1)),
 	)
 	if err != nil {
+		logger.Error(err)
 		return err
 	}
 	params := (&auth.UserToCreate{}).

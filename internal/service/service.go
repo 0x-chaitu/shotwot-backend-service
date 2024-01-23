@@ -30,6 +30,9 @@ type Users interface {
 	Update(ctx context.Context, input *domain.User) (*domain.User, error)
 	GetUser(ctx context.Context, id string) (*domain.User, error)
 	Delete(ctx context.Context, id string) error
+
+	GetAllUsers(ctx context.Context) ([]*domain.User, error)
+
 	// RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error)
 	// Verify(ctx context.Context, userID primitive.ObjectID, hash string) error
 }

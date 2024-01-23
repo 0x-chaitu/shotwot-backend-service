@@ -5,8 +5,10 @@ import (
 	"shotwot_backend/internal/domain"
 	"shotwot_backend/pkg/database/mongodb"
 	"shotwot_backend/pkg/helper"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -65,4 +67,27 @@ func (r *UsersRepo) Get(ctx context.Context, id string) (*domain.User, error) {
 	user := domain.User{}
 	decodeErr := result.Decode(&user)
 	return &user, decodeErr
+}
+
+func (r *UsersRepo) GetAllUsers(ctx context.Context) ([]*domain.User, error) {
+	var cond = "$lt"
+	var filter primitive.D
+
+	filter = append(filter, bson.E{Key: "created", Value: bson.D{
+		{Key: cond, Value: time.Now()}}})
+	opts := options.Find()
+	opts.SetLimit(int64(20))
+	cursor, err := r.db.Find(ctx, filter, opts)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+	cursor.SetBatchSize(20)
+
+	var results []*domain.User
+	if err = cursor.All(context.TODO(), &results); err != nil {
+		return nil, err
+	}
+
+	return results, nil
 }

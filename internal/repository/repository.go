@@ -14,6 +14,8 @@ type Users interface {
 	Update(ctx context.Context, user *domain.User) (*domain.User, error)
 
 	Get(ctx context.Context, id string) (*domain.User, error)
+
+	GetAllUsers(ctx context.Context) ([]*domain.User, error)
 }
 
 type Admins interface {
