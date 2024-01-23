@@ -20,6 +20,7 @@ func (h *Handler) initAdminRoutes() http.Handler {
 	r.Route("/", func(r chi.Router) {
 		r.Use(h.parseAdmin)
 		r.Post("/create", h.createAdmin)
+		r.Get("/userlist", h.getAllUsers)
 		r.Put("/update", h.adminUpdate)
 		r.Get("/list", h.getAllAdmin)
 		r.Delete("/delete", h.deleteAdmin)
@@ -38,6 +39,7 @@ func (h *Handler) createAdmin(w http.ResponseWriter, r *http.Request) {
 			HTTPStatusCode: http.StatusBadRequest,
 			ErrorText:      "not superadmin",
 		})
+		return
 	}
 	decoder := json.NewDecoder(r.Body)
 	var inp service.AccountAuthInput
@@ -142,6 +144,32 @@ func (h *Handler) getAllAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	adminList, err := h.services.Admins.GetAllAdmins(r.Context())
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusInternalServerError,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+	render.Render(w, r, &AppResponse{
+		HTTPStatusCode: http.StatusOK,
+		Success:        true,
+		Data:           adminList,
+	})
+}
+
+func (h *Handler) getAllUsers(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	adminIdentity := ctx.Value(adminCtx{}).(*jwtauth.CustomAdminClaims)
+	role := adminIdentity.AdminRole
+	if !(role == jwtauth.Admin || role == jwtauth.SuperAdmin) {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      "action not permitted",
+		})
+		return
+	}
+	adminList, err := h.services.Users.GetAllUsers(r.Context())
 	if err != nil {
 		render.Render(w, r, &ErrResponse{
 			HTTPStatusCode: http.StatusInternalServerError,
