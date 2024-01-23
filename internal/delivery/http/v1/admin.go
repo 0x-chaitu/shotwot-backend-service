@@ -34,13 +34,6 @@ func (h *Handler) initAdminRoutes() http.Handler {
 func (h *Handler) createAdmin(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	adminIdentity := ctx.Value(adminCtx{}).(*jwtauth.CustomAdminClaims)
-	if adminIdentity.AdminRole != jwtauth.SuperAdmin {
-		render.Render(w, r, &ErrResponse{
-			HTTPStatusCode: http.StatusBadRequest,
-			ErrorText:      "not superadmin",
-		})
-		return
-	}
 	decoder := json.NewDecoder(r.Body)
 	var inp service.AccountAuthInput
 	err := decoder.Decode(&inp)
@@ -51,7 +44,13 @@ func (h *Handler) createAdmin(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-
+	if adminIdentity.AdminRole > inp.Role {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      domain.ErrNotAuthorized.Error(),
+		})
+		return
+	}
 	err = h.services.Admins.CreateAdmin(r.Context(), inp)
 	if err != nil {
 		if errors.Is(err, domain.ErrAccountAlreadyExists) {

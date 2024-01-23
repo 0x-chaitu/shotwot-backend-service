@@ -86,6 +86,10 @@ func (s *UsersService) Delete(ctx context.Context, id string) error {
 	return s.firebaseAuthClient.DeleteUser(ctx, id)
 }
 
+func (s *UsersService) GetAllUsers(ctx context.Context) ([]*domain.User, error) {
+	return s.repo.GetAllUsers(ctx)
+}
+
 func (s *UsersService) createSession(ctx context.Context, userId string) (*Tokens, error) {
 	token, err := s.tokenManager.NewJWT(fmt.Sprint(userId), s.accessTokenTTL)
 	if err != nil {
