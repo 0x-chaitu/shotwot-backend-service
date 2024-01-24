@@ -101,7 +101,7 @@ func (h *Handler) briefUpdate(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) listBriefs(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var predicate helper.Predicate
+	var predicate helper.BriefPredicate
 	err := decoder.Decode(&predicate)
 	if err != nil {
 		render.Render(w, r, &ErrResponse{

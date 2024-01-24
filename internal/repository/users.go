@@ -5,6 +5,7 @@ import (
 	"shotwot_backend/internal/domain"
 	"shotwot_backend/pkg/database/mongodb"
 	"shotwot_backend/pkg/helper"
+	"shotwot_backend/pkg/logger"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -69,25 +70,42 @@ func (r *UsersRepo) Get(ctx context.Context, id string) (*domain.User, error) {
 	return &user, decodeErr
 }
 
-func (r *UsersRepo) GetAllUsers(ctx context.Context) ([]*domain.User, error) {
+func (r *UsersRepo) GetUsers(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error) {
 	var cond = "$lt"
 	var filter primitive.D
+	filter = primitive.D{}
+	logger.Info(predicate.ByDate)
+	if !predicate.ByDate.IsZero() {
+		filter = append(filter, bson.E{Key: "created", Value: bson.D{
+			{Key: cond, Value: predicate.ByDate}}})
+	} else {
+		filter = append(filter, bson.E{Key: "created", Value: bson.D{
+			{Key: cond, Value: time.Now()}}})
+	}
 
-	filter = append(filter, bson.E{Key: "created", Value: bson.D{
-		{Key: cond, Value: time.Now()}}})
-	opts := options.Find()
+	opts := options.Find().SetSort(bson.D{{Key: "created", Value: -1}})
 	opts.SetLimit(int64(20))
 	cursor, err := r.db.Find(ctx, filter, opts)
 	if err != nil {
 		return nil, err
 	}
 	defer cursor.Close(ctx)
-	cursor.SetBatchSize(20)
+	cursor.SetBatchSize(100)
 
-	var results []*domain.User
+	results := []*domain.User{}
+
 	if err = cursor.All(context.TODO(), &results); err != nil {
 		return nil, err
 	}
 
 	return results, nil
+}
+
+func (r *UsersRepo) TotalUsers(ctx context.Context) (int64, error) {
+	opts := options.Count().SetHint("_id_")
+	count, err := r.db.CountDocuments(ctx, bson.D{}, opts)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }

@@ -31,7 +31,9 @@ type Users interface {
 	GetUser(ctx context.Context, id string) (*domain.User, error)
 	Delete(ctx context.Context, id string) error
 
-	GetAllUsers(ctx context.Context) ([]*domain.User, error)
+	GetUsers(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error)
+
+	TotalUsers(ctx context.Context) (int64, error)
 
 	// RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error)
 	// Verify(ctx context.Context, userID primitive.ObjectID, hash string) error
@@ -41,7 +43,7 @@ type Admins interface {
 	CreateAdmin(ctx context.Context, input AccountAuthInput) error
 	SignIn(ctx context.Context, input AccountAuthInput) (*Tokens, error)
 	Update(ctx context.Context, input *domain.Admin) (*domain.Admin, error)
-	// GetUser(ctx context.Context, id string) (*domain.User, error)
+	GetAdmin(ctx context.Context, id string) (*domain.Admin, error)
 	Delete(ctx context.Context, id string) error
 
 	GetAllAdmins(ctx context.Context) ([]*domain.Admin, error)
@@ -55,7 +57,7 @@ type Briefs interface {
 
 	Update(ctx context.Context, input *domain.Brief) (*domain.Brief, error)
 
-	GetBriefs(ctx context.Context, predicate *helper.Predicate) ([]*domain.Brief, error)
+	GetBriefs(ctx context.Context, predicate *helper.BriefPredicate) ([]*domain.Brief, error)
 
 	DeleteBrief(ctx context.Context, id string) error
 }

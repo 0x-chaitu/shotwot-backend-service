@@ -25,7 +25,7 @@ func (b *BriefsService) Create(ctx context.Context, input *domain.Brief) (*domai
 
 }
 
-func (b *BriefsService) GetBriefs(ctx context.Context, predicate *helper.Predicate) ([]*domain.Brief, error) {
+func (b *BriefsService) GetBriefs(ctx context.Context, predicate *helper.BriefPredicate) ([]*domain.Brief, error) {
 	return b.repo.GetBriefs(ctx, predicate)
 }
 

@@ -50,6 +50,10 @@ func (a *AdminsService) GetAllAdmins(ctx context.Context) ([]*domain.Admin, erro
 	return a.repo.GetAdmins(ctx)
 }
 
+func (a *AdminsService) GetAdmin(ctx context.Context, id string) (*domain.Admin, error) {
+	return a.repo.Get(ctx, id)
+}
+
 func (a *AdminsService) CreateAdmin(ctx context.Context, input AccountAuthInput) error {
 	err := validation.ValidateStruct(&input,
 		validation.Field(&input.Password, validation.Required),

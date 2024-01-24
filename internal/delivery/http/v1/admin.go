@@ -7,6 +7,7 @@ import (
 	"shotwot_backend/internal/domain"
 	"shotwot_backend/internal/service"
 	jwtauth "shotwot_backend/pkg/auth"
+	"shotwot_backend/pkg/helper"
 	"shotwot_backend/pkg/logger"
 
 	"github.com/go-chi/chi/v5"
@@ -17,10 +18,12 @@ func (h *Handler) initAdminRoutes() http.Handler {
 	r := chi.NewRouter()
 
 	r.Post("/signin", h.adminSignIn)
+	r.Get("/totalusers", h.getTotalUsers)
+	r.Get("/details/{adminId}", h.getAdmin)
 	r.Route("/", func(r chi.Router) {
 		r.Use(h.parseAdmin)
 		r.Post("/create", h.createAdmin)
-		r.Get("/userlist", h.getAllUsers)
+		r.Post("/users/list", h.getAllUsers)
 		r.Put("/update", h.adminUpdate)
 		r.Get("/list", h.getAllAdmin)
 		r.Delete("/delete", h.deleteAdmin)
@@ -29,6 +32,20 @@ func (h *Handler) initAdminRoutes() http.Handler {
 	})
 	return r
 
+}
+
+func (h *Handler) getAdmin(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "adminId")
+	admin, err := h.services.Admins.GetAdmin(r.Context(), id)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+	render.Status(r, http.StatusOK)
+	render.Render(w, r, admin)
 }
 
 func (h *Handler) createAdmin(w http.ResponseWriter, r *http.Request) {
@@ -168,7 +185,18 @@ func (h *Handler) getAllUsers(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	adminList, err := h.services.Users.GetAllUsers(r.Context())
+	decoder := json.NewDecoder(r.Body)
+	var predicate helper.UsersPredicate
+	err := decoder.Decode(&predicate)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+
+	userList, err := h.services.Users.GetUsers(r.Context(), &predicate)
 	if err != nil {
 		render.Render(w, r, &ErrResponse{
 			HTTPStatusCode: http.StatusInternalServerError,
@@ -179,7 +207,24 @@ func (h *Handler) getAllUsers(w http.ResponseWriter, r *http.Request) {
 	render.Render(w, r, &AppResponse{
 		HTTPStatusCode: http.StatusOK,
 		Success:        true,
-		Data:           adminList,
+		Data:           userList,
+	})
+}
+
+func (h *Handler) getTotalUsers(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	users, err := h.services.Users.TotalUsers(ctx)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusInternalServerError,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+	render.Render(w, r, &AppResponse{
+		HTTPStatusCode: http.StatusOK,
+		Success:        true,
+		Data:           users,
 	})
 }
 

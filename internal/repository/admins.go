@@ -71,7 +71,7 @@ func (r *AdminsRepo) GetAdmins(ctx context.Context) ([]*domain.Admin, error) {
 }
 
 func (r *AdminsRepo) Get(ctx context.Context, id string) (*domain.Admin, error) {
-	filter := bson.M{"_id": "Ze0EvtlUPmb8H3tYtkuK1sTDpgU2"}
+	filter := bson.M{"_id": id}
 	result := r.db.FindOne(ctx, filter)
 	if err := handleSingleError(result); err != nil {
 		logger.Error(err)
