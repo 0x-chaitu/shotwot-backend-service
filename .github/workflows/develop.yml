@@ -40,7 +40,7 @@ jobs:
         with:
           hosts: 'ubuntu@ec2-3-109-214-217.ap-south-1.compute.amazonaws.com'
           privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
-          command: ps -ef | grep main 
+          command: kill $(pidof main) && nohup ./main &
     
 
     
