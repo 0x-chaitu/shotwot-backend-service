@@ -35,7 +35,14 @@ jobs:
           REMOTE_HOST: "ec2-3-109-214-217.ap-south-1.compute.amazonaws.com"
           REMOTE_USER: "ubuntu"
 
-      - name: Restart Go App Service
-        run: ssh -i ${{ secrets.SSH_PRIVATE_KEY }} ubuntu@ec2-3-109-214-217.ap-south-1.compute.amazonaws.com "systemctl restart shotwotTest"
+      - name: Execute SSH commmands on remote server
+        uses: JimCronqvist/action-ssh@master
+        with:
+          hosts: 'ubuntu@ec2-3-109-214-217.ap-south-1.compute.amazonaws.com'
+          privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
+          command: ps -ef | grep main 
     
 
+    
+    
+    
