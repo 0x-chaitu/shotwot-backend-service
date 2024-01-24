@@ -35,12 +35,12 @@ jobs:
           REMOTE_HOST: "ec2-3-109-214-217.ap-south-1.compute.amazonaws.com"
           REMOTE_USER: "ubuntu"
 
-      - name: Execute SSH commmands on remote server
-        uses: JimCronqvist/action-ssh@master
-        with:
-          hosts: 'ubuntu@ec2-3-109-214-217.ap-south-1.compute.amazonaws.com'
-          privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
-          command: kill $(pidof main) && nohup ./main &
+      # - name: Execute SSH commmands on remote server
+      #   uses: JimCronqvist/action-ssh@master
+      #   with:
+      #     hosts: 'ubuntu@ec2-3-109-214-217.ap-south-1.compute.amazonaws.com'
+      #     privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     command: kill $(pidof main) && nohup ./main &
     
 
     
