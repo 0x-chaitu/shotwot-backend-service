@@ -5,7 +5,6 @@ import (
 	"shotwot_backend/internal/domain"
 	"shotwot_backend/pkg/database/mongodb"
 	"shotwot_backend/pkg/helper"
-	"shotwot_backend/pkg/logger"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -74,7 +73,6 @@ func (r *UsersRepo) GetUsers(ctx context.Context, predicate *helper.UsersPredica
 	var cond = "$lt"
 	var filter primitive.D
 	filter = primitive.D{}
-	logger.Info(predicate.ByDate)
 	if !predicate.ByDate.IsZero() {
 		filter = append(filter, bson.E{Key: "created", Value: bson.D{
 			{Key: cond, Value: predicate.ByDate}}})
@@ -84,6 +82,10 @@ func (r *UsersRepo) GetUsers(ctx context.Context, predicate *helper.UsersPredica
 	}
 
 	opts := options.Find().SetSort(bson.D{{Key: "created", Value: -1}})
+	if predicate.Skip != 0 {
+		opts.SetSkip(int64(predicate.Skip) * 20)
+	}
+
 	opts.SetLimit(int64(20))
 	cursor, err := r.db.Find(ctx, filter, opts)
 	if err != nil {
