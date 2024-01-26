@@ -30,7 +30,7 @@ func (r *BriefsRepo) Create(ctx context.Context, brief *domain.Brief) (*domain.B
 	return brief, nil
 }
 
-func (r *BriefsRepo) GetBriefs(ctx context.Context, predicate *helper.Predicate) ([]*domain.Brief, error) {
+func (r *BriefsRepo) GetBriefs(ctx context.Context, predicate *helper.BriefPredicate) ([]*domain.Brief, error) {
 	var cond string
 	if predicate.Order == helper.Ascending {
 		cond = "$gt"

@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	SuperAdmin = iota
+	SuperAdmin = iota + 1
 	Admin
 	Curator
 )

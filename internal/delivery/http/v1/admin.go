@@ -7,6 +7,7 @@ import (
 	"shotwot_backend/internal/domain"
 	"shotwot_backend/internal/service"
 	jwtauth "shotwot_backend/pkg/auth"
+	"shotwot_backend/pkg/helper"
 	"shotwot_backend/pkg/logger"
 
 	"github.com/go-chi/chi/v5"
@@ -17,9 +18,13 @@ func (h *Handler) initAdminRoutes() http.Handler {
 	r := chi.NewRouter()
 
 	r.Post("/signin", h.adminSignIn)
+	r.Get("/totalusers", h.getTotalUsers)
 	r.Route("/", func(r chi.Router) {
 		r.Use(h.parseAdmin)
+		r.Get("/details/{adminId}", h.getAdmin)
 		r.Post("/create", h.createAdmin)
+		r.Post("/users/list", h.getAllUsers)
+		r.Post("/users/search", h.searchUsers)
 		r.Put("/update", h.adminUpdate)
 		r.Get("/list", h.getAllAdmin)
 		r.Delete("/delete", h.deleteAdmin)
@@ -30,15 +35,29 @@ func (h *Handler) initAdminRoutes() http.Handler {
 
 }
 
+func (h *Handler) getAdmin(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "adminId")
+	ctx := r.Context()
+	logger.Info(id)
+	if id == "me" {
+		adminIdentity := ctx.Value(adminCtx{}).(*jwtauth.CustomAdminClaims)
+		id = adminIdentity.Subject
+	}
+	admin, err := h.services.Admins.GetAdmin(r.Context(), id)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+	render.Status(r, http.StatusOK)
+	render.Render(w, r, admin)
+}
+
 func (h *Handler) createAdmin(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	adminIdentity := ctx.Value(adminCtx{}).(*jwtauth.CustomAdminClaims)
-	if adminIdentity.AdminRole != jwtauth.SuperAdmin {
-		render.Render(w, r, &ErrResponse{
-			HTTPStatusCode: http.StatusBadRequest,
-			ErrorText:      "not superadmin",
-		})
-	}
 	decoder := json.NewDecoder(r.Body)
 	var inp service.AccountAuthInput
 	err := decoder.Decode(&inp)
@@ -49,7 +68,13 @@ func (h *Handler) createAdmin(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-
+	if adminIdentity.AdminRole > inp.Role {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      domain.ErrNotAuthorized.Error(),
+		})
+		return
+	}
 	err = h.services.Admins.CreateAdmin(r.Context(), inp)
 	if err != nil {
 		if errors.Is(err, domain.ErrAccountAlreadyExists) {
@@ -153,6 +178,97 @@ func (h *Handler) getAllAdmin(w http.ResponseWriter, r *http.Request) {
 		HTTPStatusCode: http.StatusOK,
 		Success:        true,
 		Data:           adminList,
+	})
+}
+
+func (h *Handler) getAllUsers(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	adminIdentity := ctx.Value(adminCtx{}).(*jwtauth.CustomAdminClaims)
+	role := adminIdentity.AdminRole
+	if !(role == jwtauth.Admin || role == jwtauth.SuperAdmin) {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      "action not permitted",
+		})
+		return
+	}
+	decoder := json.NewDecoder(r.Body)
+	var predicate helper.UsersPredicate
+	err := decoder.Decode(&predicate)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+
+	userList, err := h.services.Users.GetUsers(r.Context(), &predicate)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusInternalServerError,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+	render.Render(w, r, &AppResponse{
+		HTTPStatusCode: http.StatusOK,
+		Success:        true,
+		Data:           userList,
+	})
+}
+
+func (h *Handler) searchUsers(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	adminIdentity := ctx.Value(adminCtx{}).(*jwtauth.CustomAdminClaims)
+	role := adminIdentity.AdminRole
+	if !(role == jwtauth.Admin || role == jwtauth.SuperAdmin) {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      "action not permitted",
+		})
+		return
+	}
+	decoder := json.NewDecoder(r.Body)
+	var predicate helper.UsersPredicate
+	err := decoder.Decode(&predicate)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+
+	userList, err := h.services.Users.SearchUsers(r.Context(), &predicate)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusInternalServerError,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+	render.Render(w, r, &AppResponse{
+		HTTPStatusCode: http.StatusOK,
+		Success:        true,
+		Data:           userList,
+	})
+}
+
+func (h *Handler) getTotalUsers(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	users, err := h.services.Users.TotalUsers(ctx)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusInternalServerError,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+	render.Render(w, r, &AppResponse{
+		HTTPStatusCode: http.StatusOK,
+		Success:        true,
+		Data:           users,
 	})
 }
 

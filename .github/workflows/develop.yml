@@ -16,7 +16,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21.3'
+          go-version: '1.21.6'
 
       - name: Install dependencies
         run: | 
@@ -35,7 +35,16 @@ jobs:
           REMOTE_HOST: "ec2-3-109-214-217.ap-south-1.compute.amazonaws.com"
           REMOTE_USER: "ubuntu"
 
-      - name: Restart Go App Service
-        run: ssh -i ${{ secrets.SSH_PRIVATE_KEY }} ubuntu@ec2-3-109-214-217.ap-south-1.compute.amazonaws.com "systemctl restart shotwotTest"
+      # - name: Execute SSH commmands on remote server
+      #   uses: JimCronqvist/action-ssh@master
+      #   with:
+      #     hosts: 'ubuntu@ec2-3-109-214-217.ap-south-1.compute.amazonaws.com'
+      #     privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     command: |
+            # kill $(pidof main)
+            # nohup ./main &
     
 
+    
+    
+    

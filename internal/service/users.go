@@ -7,6 +7,7 @@ import (
 	"shotwot_backend/internal/repository"
 	jwtauth "shotwot_backend/pkg/auth"
 	"shotwot_backend/pkg/firebase"
+	"shotwot_backend/pkg/helper"
 	"shotwot_backend/pkg/logger"
 	"time"
 
@@ -84,6 +85,18 @@ func (s *UsersService) Update(ctx context.Context, input *domain.User) (*domain.
 
 func (s *UsersService) Delete(ctx context.Context, id string) error {
 	return s.firebaseAuthClient.DeleteUser(ctx, id)
+}
+
+func (s *UsersService) GetUsers(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error) {
+	return s.repo.GetUsers(ctx, predicate)
+}
+
+func (s *UsersService) SearchUsers(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error) {
+	return s.repo.SearchUsers(ctx, predicate)
+}
+
+func (s *UsersService) TotalUsers(ctx context.Context) (int64, error) {
+	return s.repo.TotalUsers(ctx)
 }
 
 func (s *UsersService) createSession(ctx context.Context, userId string) (*Tokens, error) {

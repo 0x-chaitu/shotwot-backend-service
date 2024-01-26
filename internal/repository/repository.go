@@ -14,6 +14,12 @@ type Users interface {
 	Update(ctx context.Context, user *domain.User) (*domain.User, error)
 
 	Get(ctx context.Context, id string) (*domain.User, error)
+
+	GetUsers(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error)
+
+	TotalUsers(ctx context.Context) (int64, error)
+
+	SearchUsers(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error)
 }
 
 type Admins interface {
@@ -33,7 +39,7 @@ type Briefs interface {
 
 	Get(ctx context.Context, id string) (*domain.Brief, error)
 
-	GetBriefs(ctx context.Context, predicate *helper.Predicate) ([]*domain.Brief, error)
+	GetBriefs(ctx context.Context, predicate *helper.BriefPredicate) ([]*domain.Brief, error)
 
 	DeleteBrief(ctx context.Context, id string) error
 }
