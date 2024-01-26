@@ -5,6 +5,7 @@ import (
 	"shotwot_backend/internal/domain"
 	"shotwot_backend/pkg/database/mongodb"
 	"shotwot_backend/pkg/helper"
+	"shotwot_backend/pkg/logger"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -67,6 +68,35 @@ func (r *UsersRepo) Get(ctx context.Context, id string) (*domain.User, error) {
 	user := domain.User{}
 	decodeErr := result.Decode(&user)
 	return &user, decodeErr
+}
+
+func (r *UsersRepo) SearchUsers(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error) {
+	searchStage := bson.D{{Key: "$search", Value: bson.M{
+		"index": "SearchUsers",
+		"autocomplete": bson.D{{Key: "path", Value: "email"},
+			{Key: "query", Value: predicate.Key}},
+	}}}
+
+	limitStage := bson.D{{Key: "$limit", Value: 20}}
+	skipStage := bson.D{{Key: "$skip", Value: predicate.Skip}}
+
+	opts := options.Aggregate().SetMaxTime(5 * time.Second)
+
+	cursor, err := r.db.Aggregate(ctx,
+		mongo.Pipeline{searchStage, skipStage, limitStage}, opts)
+
+	if err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+
+	var results []*domain.User
+
+	if err = cursor.All(ctx, &results); err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+	return results, err
 }
 
 func (r *UsersRepo) GetUsers(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error) {

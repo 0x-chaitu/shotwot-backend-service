@@ -18,6 +18,8 @@ type Users interface {
 	GetUsers(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error)
 
 	TotalUsers(ctx context.Context) (int64, error)
+
+	SearchUsers(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error)
 }
 
 type Admins interface {

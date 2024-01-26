@@ -91,6 +91,10 @@ func (s *UsersService) GetUsers(ctx context.Context, predicate *helper.UsersPred
 	return s.repo.GetUsers(ctx, predicate)
 }
 
+func (s *UsersService) SearchUsers(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error) {
+	return s.repo.SearchUsers(ctx, predicate)
+}
+
 func (s *UsersService) TotalUsers(ctx context.Context) (int64, error) {
 	return s.repo.TotalUsers(ctx)
 }

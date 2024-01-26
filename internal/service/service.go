@@ -33,6 +33,8 @@ type Users interface {
 
 	GetUsers(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error)
 
+	SearchUsers(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error)
+
 	TotalUsers(ctx context.Context) (int64, error)
 
 	// RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error)
