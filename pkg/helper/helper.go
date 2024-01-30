@@ -30,8 +30,9 @@ type BriefPredicate struct {
 }
 
 type UsersPredicate struct {
-	Order  int       `json:"order,omitempty"`
-	ByDate time.Time `json:"created,omitempty"`
-	Skip   int       `json:"skip,omitempty"`
-	Key    string    `json:"key,omitempty"`
+	Order     int       `json:"order,omitempty"`
+	StartDate time.Time `json:"created,omitempty"`
+	EndDate   time.Time `json:"end,omitempty"`
+	Skip      int       `json:"skip,omitempty"`
+	Key       string    `json:"key,omitempty"`
 }

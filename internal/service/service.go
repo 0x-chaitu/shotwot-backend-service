@@ -37,6 +37,8 @@ type Users interface {
 
 	TotalUsers(ctx context.Context) (int64, error)
 
+	Download(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error)
+
 	// RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error)
 	// Verify(ctx context.Context, userID primitive.ObjectID, hash string) error
 }

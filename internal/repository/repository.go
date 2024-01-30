@@ -19,6 +19,8 @@ type Users interface {
 
 	TotalUsers(ctx context.Context) (int64, error)
 
+	Download(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error)
+
 	SearchUsers(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error)
 }
 

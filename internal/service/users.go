@@ -74,6 +74,9 @@ func (s *UsersService) SignIn(ctx context.Context, input AccountAuthInput) (*Tok
 	return s.createSession(ctx, token.UID)
 }
 
+func (s *UsersService) Download(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error) {
+	return s.repo.Download(ctx, predicate)
+}
 func (s *UsersService) Update(ctx context.Context, input *domain.User) (*domain.User, error) {
 	user, err := s.repo.Update(ctx, input)
 	if err != nil {

@@ -10,6 +10,8 @@ import (
 	"shotwot_backend/pkg/helper"
 	"shotwot_backend/pkg/logger"
 
+	"github.com/gocarina/gocsv"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 )
@@ -22,6 +24,7 @@ func (h *Handler) initAdminRoutes() http.Handler {
 	r.Route("/", func(r chi.Router) {
 		r.Use(h.parseAdmin)
 		r.Get("/details/{adminId}", h.getAdmin)
+		r.Post("/users/download", h.downloadUsers)
 		r.Post("/create", h.createAdmin)
 		r.Post("/users/list", h.getAllUsers)
 		r.Post("/users/search", h.searchUsers)
@@ -53,6 +56,37 @@ func (h *Handler) getAdmin(w http.ResponseWriter, r *http.Request) {
 	}
 	render.Status(r, http.StatusOK)
 	render.Render(w, r, admin)
+}
+
+func (h *Handler) downloadUsers(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	var predicate helper.UsersPredicate
+	err := decoder.Decode(&predicate)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+
+	userArray, err := h.services.Users.Download(r.Context(), &predicate)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+	w.Header().Set("Content-Type", "text/csv")
+	w.Header().Add("Content-Disposition", `attachment;Shotwot_Users.csv`)
+	if err = gocsv.Marshal(userArray, w); err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusInternalServerError,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
 }
 
 func (h *Handler) createAdmin(w http.ResponseWriter, r *http.Request) {

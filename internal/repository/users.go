@@ -70,6 +70,25 @@ func (r *UsersRepo) Get(ctx context.Context, id string) (*domain.User, error) {
 	return &user, decodeErr
 }
 
+func (r *UsersRepo) Download(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error) {
+	opts := options.Find().SetSort(bson.D{{Key: "created", Value: -1}})
+	filter := bson.M{"created": bson.M{"$gte": predicate.StartDate,
+		"$lte": predicate.EndDate}}
+	cursor, err := r.db.Find(ctx, filter, opts)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	results := []*domain.User{}
+
+	if err = cursor.All(context.Background(), &results); err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}
+
 func (r *UsersRepo) SearchUsers(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error) {
 	searchStage := bson.D{{Key: "$search", Value: bson.M{
 		"index": "SearchUsers",
@@ -103,9 +122,9 @@ func (r *UsersRepo) GetUsers(ctx context.Context, predicate *helper.UsersPredica
 	var cond = "$lt"
 	var filter primitive.D
 	filter = primitive.D{}
-	if !predicate.ByDate.IsZero() {
+	if !predicate.StartDate.IsZero() {
 		filter = append(filter, bson.E{Key: "created", Value: bson.D{
-			{Key: cond, Value: predicate.ByDate}}})
+			{Key: cond, Value: predicate.StartDate}}})
 	} else {
 		filter = append(filter, bson.E{Key: "created", Value: bson.D{
 			{Key: cond, Value: time.Now()}}})
@@ -126,7 +145,7 @@ func (r *UsersRepo) GetUsers(ctx context.Context, predicate *helper.UsersPredica
 
 	results := []*domain.User{}
 
-	if err = cursor.All(context.TODO(), &results); err != nil {
+	if err = cursor.All(context.Background(), &results); err != nil {
 		return nil, err
 	}
 
