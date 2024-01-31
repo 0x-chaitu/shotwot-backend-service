@@ -28,10 +28,10 @@ func (h *Handler) createBrief(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	adminIdentity := ctx.Value(adminCtx{}).(*jwtauth.CustomAdminClaims)
 	if !(adminIdentity.AdminRole == jwtauth.SuperAdmin ||
-		adminIdentity.AdminRole == jwtauth.Admin) {
+		adminIdentity.AdminRole == jwtauth.Admin || adminIdentity.AdminRole == jwtauth.BriefManager) {
 		render.Render(w, r, &ErrResponse{
 			HTTPStatusCode: http.StatusBadRequest,
-			ErrorText:      "not admin",
+			ErrorText:      "not enough permissions",
 		})
 	}
 	decoder := json.NewDecoder(r.Body)

@@ -13,6 +13,7 @@ import (
 const (
 	SuperAdmin = iota + 1
 	Admin
+	BriefManager
 	Curator
 )
 
