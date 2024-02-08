@@ -8,36 +8,49 @@ import (
 
 type Brief struct {
 	Id           primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
-	Title        string             `bson:"title,omitempty" json:"title,omitempty"`
-	Images       []string           `bson:"images" json:"image"`
-	Reward       int64              `bson:"reward,omitempty" json:"reward,omitempty"`
+	Title        string             `bson:"title" json:"title"`
+	CardImage    string             `bson:"cardImage" json:"cardImage"`
+	Images       []string           `bson:"images" json:"images"`
+	Reward       int64              `bson:"reward" json:"reward"`
 	Description  string             `bson:"description" json:"description"`
 	Tags         []string           `bson:"tags" json:"tags"`
 	ShotwotIdeas []*ShotwotIdeas    `bson:"shotwotIdeas" json:"shotwotIdeas"`
-	References   []string           `bson:"references" json:"references"`
 	Priority     int                `bson:"priority" json:"priority"`
 
 	// timelapse, adventure, abstract
-	Category    []string `bson:"category" json:"category"`
-	Camera      []string `bson:"camera" json:"camera"`
-	TechDetails []string `bson:"techDetails" json:"techDetails"`
+	Camera     []string `bson:"camera" json:"camera"`
+	Resolution string   `bson:"resolution" json:"resolution"`
+	FrameRate  string   `bson:"frameRate" json:"frameRate"`
+	Duration   string   `bson:"duration" json:"duration"`
 	// 0 is indoor, 1 outdoor, 2 studio
-	LightSetup []int `bson:"lightSetup" json:"lightSetup"`
+	LightSetup []string `bson:"lightSetup" json:"lightSetup"`
 	// audio, video, photo
-	Type []string `bson:"type" json:"type"`
+	Type string `bson:"type" json:"type"`
 
 	CreatedBy string `bson:"createdby,omitempty" json:"createdBy,omitempty"`
 
 	Created time.Time `bson:"created,omitempty" json:"created,omitempty"`
+	Expiry  time.Time `bson:"expiry,omitempty" json:"expiry,omitempty"`
 
-	IsActive  bool `bson:"isActive" json:"isActive"`
-	Archieved bool `bson:"archieved" json:"archieved"`
+	IsActive bool `bson:"isActive" json:"isActive"`
 
-	ActivatedOn *time.Time `bson:"activated_on,omitempty" json:"activatedOn,omitempty"`
-	DeactivedOn *time.Time `bson:"deactivated_on,omitempty" json:"deactivatedOn,omitempty"`
+	// ActivatedOn *time.Time `bson:"activated_on,omitempty" json:"activatedOn,omitempty"`
+	// DeactivedOn *time.Time `bson:"deactivated_on,omitempty" json:"deactivatedOn,omitempty"`
 }
 
 type ShotwotIdeas struct {
 	Title       string `bson:"title" json:"title"`
 	Description string `bson:"description" json:"description"`
+}
+
+type BriefInput struct {
+	*Brief
+	Files    []File `bson:"files" json:"files"`
+	CardFile File   `bson:"file" json:"file"`
+}
+
+type BriefRes struct {
+	*Brief
+	Urls    []string `bson:"urls" json:"urls"`
+	CardUrl string   `bson:"url" json:"url"`
 }

@@ -42,23 +42,6 @@ func Run(configPath string) {
 	// 	o.BaseEndpoint = aws.String("https://s3.eu-central-1.wasabisys.com/")
 	// })
 
-	// x := s3.NewPresignClient(client)
-	// bucketName := "warehouse-test"
-	// objectKey := "warehouse.mp4"
-	// request, err := x.PresignPutObject(context.TODO(), &s3.PutObjectInput{
-	// 	Bucket:          aws.String(bucketName),
-	// 	Key:             aws.String(objectKey),
-	// 	ContentType:     aws.String("video/mp4"),
-	// 	ContentEncoding: aws.String("base64"),
-	// }, func(opts *s3.PresignOptions) {
-	// 	opts.Expires = time.Duration(100000 * int64(time.Second))
-	// })
-	// if err != nil {
-	// 	log.Printf("Couldn't get a presigned request to put %v:%v. Here's why: %v\n",
-	// 		bucketName, objectKey, err)
-	// }
-	// logger.Info(request)
-
 	wasabiS3Client, err := s3.NewWasabiBucket("")
 	if err != nil {
 		logger.Error(err)

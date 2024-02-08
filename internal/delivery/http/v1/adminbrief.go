@@ -6,6 +6,7 @@ import (
 	"shotwot_backend/internal/domain"
 	jwtauth "shotwot_backend/pkg/auth"
 	"shotwot_backend/pkg/helper"
+	"shotwot_backend/pkg/logger"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -35,11 +36,12 @@ func (h *Handler) createBrief(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 	decoder := json.NewDecoder(r.Body)
-	var brief domain.Brief
+	var brief domain.BriefInput
 	err := decoder.Decode(&brief)
 	brief.Created = time.Now()
 	brief.CreatedBy = adminIdentity.Subject
 	if err != nil {
+		logger.Errorf("Error in decoding brief %v", err)
 		render.Render(w, r, &ErrResponse{
 			HTTPStatusCode: http.StatusBadRequest,
 			ErrorText:      err.Error(),
@@ -49,6 +51,7 @@ func (h *Handler) createBrief(w http.ResponseWriter, r *http.Request) {
 
 	resBrief, err := h.services.Briefs.Create(ctx, &brief)
 	if err != nil {
+		logger.Error(err)
 		render.Render(w, r, &ErrResponse{
 			HTTPStatusCode: http.StatusInternalServerError,
 			ErrorText:      err.Error(),
@@ -66,7 +69,8 @@ func (h *Handler) briefUpdate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	adminIdentity := ctx.Value(adminCtx{}).(*jwtauth.CustomAdminClaims)
 	if !(adminIdentity.AdminRole == jwtauth.SuperAdmin ||
-		adminIdentity.AdminRole == jwtauth.Admin) {
+		adminIdentity.AdminRole == jwtauth.Admin ||
+		adminIdentity.AdminRole == jwtauth.BriefManager) {
 		render.Render(w, r, &ErrResponse{
 			HTTPStatusCode: http.StatusBadRequest,
 			ErrorText:      "not admin",

@@ -7,9 +7,8 @@ import (
 	jwtauth "shotwot_backend/pkg/auth"
 	"shotwot_backend/pkg/firebase"
 	"shotwot_backend/pkg/helper"
+	"shotwot_backend/pkg/s3"
 	"time"
-
-	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
 type AccountAuthInput struct {
@@ -57,7 +56,7 @@ type Admins interface {
 }
 
 type Briefs interface {
-	Create(ctx context.Context, input *domain.Brief) (*domain.Brief, error)
+	Create(ctx context.Context, input *domain.BriefInput) (*domain.BriefRes, error)
 
 	Update(ctx context.Context, input *domain.Brief) (*domain.Brief, error)
 
@@ -94,14 +93,14 @@ type Deps struct {
 
 	AuthClient *firebase.AuthClient
 
-	WasabiS3Client *s3.Client
+	WasabiS3Client *s3.S3Client
 }
 
 func NewServices(deps Deps) *Services {
 	userService := NewUsersService(deps.Repos.Users, deps.TokenManager, deps.AccessTokenTTL, deps.RefreshTokenTTL, deps.AuthClient)
 	adminService := NewAdminsService(deps.Repos.Admins, deps.AdminTokenManager, deps.AccessTokenTTL, deps.RefreshTokenTTL, deps.AuthClient)
 
-	briefService := NewBriefsService(deps.Repos.Briefs)
+	briefService := NewBriefsService(deps.Repos.Briefs, deps.WasabiS3Client)
 
 	authService := NewAuthService(deps.TokenManager)
 	adminAuthService := NewAdminAuthService(deps.AdminTokenManager)

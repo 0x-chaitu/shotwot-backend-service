@@ -72,9 +72,9 @@ func (r *UsersRepo) Get(ctx context.Context, id string) (*domain.User, error) {
 
 func (r *UsersRepo) Download(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error) {
 	opts := options.Find().SetSort(bson.D{{Key: "created", Value: -1}})
-	filter := bson.M{"created": bson.M{"$gte": predicate.StartDate,
-		"$lte": predicate.EndDate}}
-	cursor, err := r.db.Find(ctx, filter, opts)
+	// filter := bson.M{"created": bson.M{"$gte": predicate.StartDate,
+	// 	"$lte": predicate.EndDate}}
+	cursor, err := r.db.Find(ctx, primitive.D{}, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -90,11 +90,23 @@ func (r *UsersRepo) Download(ctx context.Context, predicate *helper.UsersPredica
 }
 
 func (r *UsersRepo) SearchUsers(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error) {
-	searchStage := bson.D{{Key: "$search", Value: bson.M{
-		"index": "SearchUsers",
-		"autocomplete": bson.D{{Key: "path", Value: "email"},
-			{Key: "query", Value: predicate.Key}},
-	}}}
+	searchStage := bson.D{
+		{Key: "$search", Value: bson.M{
+			"index": "SearchUsers",
+			"compound": bson.D{
+				{Key: "should", Value: bson.A{
+					bson.D{
+						{Key: "autocomplete", Value: bson.D{{Key: "query", Value: predicate.Key}, {Key: "path", Value: "email"}}},
+					},
+					bson.D{
+						{Key: "phrase", Value: bson.M{
+							"query": predicate.Key,
+							"path":  "_id"},
+						}},
+				},
+				},
+			}},
+		}}
 
 	limitStage := bson.D{{Key: "$limit", Value: 20}}
 	skipStage := bson.D{{Key: "$skip", Value: predicate.Skip}}

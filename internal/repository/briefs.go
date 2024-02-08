@@ -4,6 +4,7 @@ import (
 	"context"
 	"shotwot_backend/internal/domain"
 	"shotwot_backend/pkg/helper"
+	"shotwot_backend/pkg/logger"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -24,6 +25,7 @@ func NewBriefsRepo(db *mongo.Database) *BriefsRepo {
 func (r *BriefsRepo) Create(ctx context.Context, brief *domain.Brief) (*domain.Brief, error) {
 	result, err := r.db.InsertOne(ctx, brief)
 	if err != nil {
+		logger.Error(err)
 		return nil, err
 	}
 	brief.Id = result.InsertedID.(primitive.ObjectID)
