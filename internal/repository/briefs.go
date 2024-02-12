@@ -33,23 +33,13 @@ func (r *BriefsRepo) Create(ctx context.Context, brief *domain.Brief) (*domain.B
 }
 
 func (r *BriefsRepo) GetBriefs(ctx context.Context, predicate *helper.BriefPredicate) ([]*domain.Brief, error) {
-	var cond string
-	if predicate.Order == helper.Ascending {
-		cond = "$gt"
-	} else {
-		cond = "$lt"
-	}
-	var filter primitive.D
-	if predicate.CreatedBy != "" {
-		filter = append(filter, bson.E{Key: "createdby", Value: predicate.CreatedBy})
-	}
-	filter = append(filter, bson.E{Key: "is_active", Value: predicate.IsActive})
-	if predicate.ByDate != "" {
-		filter = append(filter, bson.E{Key: "created", Value: bson.D{
-			{Key: cond, Value: predicate.ByDate}}})
+	filter := bson.D{}
+	if predicate.IsActive != nil {
+		logger.Info(predicate.IsActive)
+		filter = append(filter, bson.E{Key: "isActive", Value: predicate.IsActive})
+
 	}
 	opts := options.Find().SetSort(bson.D{{Key: "created", Value: predicate.Order}})
-	opts.SetLimit(int64(predicate.Limit))
 	cursor, err := r.db.Find(ctx, filter, opts)
 	if err != nil {
 		return nil, err

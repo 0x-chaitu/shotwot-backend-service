@@ -58,7 +58,7 @@ type Admins interface {
 type Briefs interface {
 	Create(ctx context.Context, input *domain.BriefInput) (*domain.BriefRes, error)
 
-	Update(ctx context.Context, input *domain.Brief) (*domain.Brief, error)
+	Update(ctx context.Context, input *domain.BriefInput) (*domain.Brief, error)
 
 	GetBriefs(ctx context.Context, predicate *helper.BriefPredicate) ([]*domain.Brief, error)
 

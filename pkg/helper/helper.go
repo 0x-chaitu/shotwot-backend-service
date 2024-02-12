@@ -24,7 +24,7 @@ func TODoc(v interface{}) (doc *bson.D, err error) {
 type BriefPredicate struct {
 	Order     int    `json:"order,omitempty"`
 	Limit     int    `json:"limit,omitempty"`
-	IsActive  bool   `json:"isActive,omitempty"`
+	IsActive  *bool  `json:"isActive,omitempty"`
 	ByDate    string `json:"byDate,omitempty"`
 	CreatedBy string `json:"createdBy,omitempty"`
 }

@@ -16,6 +16,7 @@ import (
 func (h *Handler) initBriefsRoutes() http.Handler {
 	r := chi.NewRouter()
 	r.Route("/", func(r chi.Router) {
+		r.Use(h.parseAdmin)
 		r.Post("/create", h.createBrief)
 		r.Put("/update", h.briefUpdate)
 		r.Post("/list", h.listBriefs)
@@ -78,7 +79,7 @@ func (h *Handler) briefUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	decoder := json.NewDecoder(r.Body)
-	var brief domain.Brief
+	var brief domain.BriefInput
 	err := decoder.Decode(&brief)
 	if err != nil {
 		render.Render(w, r, &ErrResponse{

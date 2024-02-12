@@ -25,7 +25,7 @@ func NewBriefsService(repo repository.Briefs, s3 *s3.S3Client) *BriefsService {
 func (b *BriefsService) Create(ctx context.Context, input *domain.BriefInput) (*domain.BriefRes, error) {
 	var images = []string{}
 	var urls = []string{}
-	timeKey := time.Now().Format("2017-09-07 17:06:06")
+	timeKey := time.Now().Format("20060102150405")
 	for _, file := range input.Files {
 		key := "app/brief/" + timeKey + "/" + file.Name
 		url, err := b.s3.PresignedUrl(key, file.Filetype)
@@ -35,13 +35,18 @@ func (b *BriefsService) Create(ctx context.Context, input *domain.BriefInput) (*
 		urls = append(urls, url.URL)
 		images = append(images, key)
 	}
-	key := "app/brief/" + timeKey + "/" + input.CardFile.Name
-	url, err := b.s3.PresignedUrl(key, input.CardFile.Filetype)
-	if err != nil {
-		return nil, err
+	var cardUrl string
+	if input.CardFile != nil {
+		key := "app/brief/" + timeKey + "/" + input.CardFile.Name
+		url, err := b.s3.PresignedUrl(key, input.CardFile.Filetype)
+		if err != nil {
+			return nil, err
+		}
+		input.CardImage = key
+		cardUrl = url.URL
 	}
+
 	input.Brief.Images = images
-	input.CardImage = key
 	brief, err := b.repo.Create(ctx, input.Brief)
 	if err != nil {
 		return nil, err
@@ -49,7 +54,7 @@ func (b *BriefsService) Create(ctx context.Context, input *domain.BriefInput) (*
 	return &domain.BriefRes{
 		Brief:   brief,
 		Urls:    urls,
-		CardUrl: url.URL,
+		CardUrl: cardUrl,
 	}, nil
 
 }
@@ -62,8 +67,8 @@ func (b *BriefsService) DeleteBrief(ctx context.Context, id string) error {
 	return b.repo.DeleteBrief(ctx, id)
 }
 
-func (b *BriefsService) Update(ctx context.Context, input *domain.Brief) (*domain.Brief, error) {
-	brief, err := b.repo.Update(ctx, input)
+func (b *BriefsService) Update(ctx context.Context, input *domain.BriefInput) (*domain.Brief, error) {
+	brief, err := b.repo.Update(ctx, input.Brief)
 	if err != nil {
 		logger.Error(err)
 		return nil, err

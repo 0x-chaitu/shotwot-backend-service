@@ -46,7 +46,7 @@ type ShotwotIdeas struct {
 type BriefInput struct {
 	*Brief
 	Files    []File `bson:"files" json:"files"`
-	CardFile File   `bson:"file" json:"file"`
+	CardFile *File  `bson:"file" json:"file"`
 }
 
 type BriefRes struct {
