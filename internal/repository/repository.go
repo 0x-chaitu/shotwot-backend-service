@@ -39,7 +39,7 @@ type Briefs interface {
 
 	Update(ctx context.Context, brief *domain.Brief) (*domain.Brief, error)
 
-	Get(ctx context.Context, id string) (*domain.Brief, error)
+	GetBrief(ctx context.Context, id string) (*domain.Brief, error)
 
 	GetBriefs(ctx context.Context, predicate *helper.BriefPredicate) ([]*domain.Brief, error)
 

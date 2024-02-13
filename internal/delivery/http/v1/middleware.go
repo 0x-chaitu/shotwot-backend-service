@@ -22,7 +22,7 @@ func (h *Handler) parseUser(next http.Handler) http.Handler {
 		header := r.Header.Get(auth)
 		splitToken := strings.Split(header, " ")
 		if len(splitToken) != 2 {
-			logger.Error(" invalid token ")
+			logger.Error("user invalid token ")
 			render.Render(w, r, &ErrResponse{
 				HTTPStatusCode: http.StatusForbidden,
 				ErrorText:      domain.ErrNotAuthorized.Error(),
@@ -48,7 +48,7 @@ func (h *Handler) parseAdmin(next http.Handler) http.Handler {
 		header := r.Header.Get(auth)
 		splitToken := strings.Split(header, " ")
 		if len(splitToken) != 2 {
-			logger.Error(" invalid token ")
+			logger.Error("admin invalid token ")
 			render.Render(w, r, &ErrResponse{
 				HTTPStatusCode: http.StatusForbidden,
 				ErrorText:      domain.ErrNotAuthorized.Error(),
