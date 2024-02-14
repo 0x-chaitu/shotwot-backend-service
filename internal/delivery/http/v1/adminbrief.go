@@ -16,7 +16,7 @@ import (
 func (h *Handler) initBriefsRoutes() http.Handler {
 	r := chi.NewRouter()
 	r.Route("/", func(r chi.Router) {
-		// r.Use(h.parseAdmin)
+		r.Use(h.parseAdmin)
 		r.Post("/create", h.createBrief)
 		r.Get("/details/{briefId}", h.getBrief)
 		r.Put("/update", h.briefUpdate)
