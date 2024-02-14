@@ -69,6 +69,8 @@ type Briefs interface {
 
 type BriefApplications interface {
 	Create(ctx context.Context, input *domain.BriefApplicationInput) (*domain.BriefApplicationRes, error)
+
+	GetBriefApplications(ctx context.Context, predicate *helper.BriefApplicationsPredicate) ([]*domain.BriefApplication, error)
 }
 
 type Auth interface {

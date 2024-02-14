@@ -4,6 +4,7 @@ import (
 	"context"
 	"shotwot_backend/internal/domain"
 	"shotwot_backend/internal/repository"
+	"shotwot_backend/pkg/helper"
 	"shotwot_backend/pkg/s3"
 )
 
@@ -29,4 +30,8 @@ func (b *BriefApplicationsService) Create(ctx context.Context, input *domain.Bri
 		BriefApplication: briefapplication,
 	}, nil
 
+}
+
+func (b *BriefApplicationsService) GetBriefApplications(ctx context.Context, predicate *helper.BriefApplicationsPredicate) ([]*domain.BriefApplication, error) {
+	return b.repo.GetBriefApplications(ctx, predicate)
 }

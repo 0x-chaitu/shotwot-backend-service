@@ -47,6 +47,8 @@ type Briefs interface {
 }
 type BriefApplications interface {
 	Create(ctx context.Context, briefapplication *domain.BriefApplication) (*domain.BriefApplication, error)
+
+	GetBriefApplications(ctx context.Context, predicate *helper.BriefApplicationsPredicate) ([]*domain.BriefApplication, error)
 }
 
 type Repositories struct {

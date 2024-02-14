@@ -36,3 +36,11 @@ type UsersPredicate struct {
 	Skip      int       `json:"skip,omitempty"`
 	Key       string    `json:"key,omitempty"`
 }
+
+type BriefApplicationsPredicate struct {
+	Order     int    `json:"order,omitempty"`
+	Limit     int    `json:"limit,omitempty"`
+	IsActive  *bool  `json:"isActive,omitempty"`
+	ByDate    string `json:"byDate,omitempty"`
+	CreatedBy string `json:"createdBy,omitempty"`
+}
