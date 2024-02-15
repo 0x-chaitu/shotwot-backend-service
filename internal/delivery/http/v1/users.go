@@ -18,13 +18,12 @@ func (h *Handler) initUsersRoutes() http.Handler {
 
 	r.Post("/signup", h.userSignUp)
 	r.Post("/signin", h.userSignIn)
-	r.Get("/user/{userId}", h.getUser)
 	r.Route("/", func(r chi.Router) {
 		r.Use(h.parseUser)
 		r.Put("/update", h.userUpdate)
 		r.Delete("/delete", h.deleteUser)
 		r.Mount("/briefapplications", h.initBriefApplicationsRoutes())
-
+		r.Get("/{userId}", h.getUser)
 	})
 	return r
 
@@ -80,7 +79,7 @@ func (h *Handler) userSignIn(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	tokens, err := h.services.Users.SignIn(r.Context(), inp)
+	res, err := h.services.Users.SignIn(r.Context(), inp)
 	if err != nil {
 		render.Render(w, r, &ErrResponse{
 			HTTPStatusCode: http.StatusNotFound,
@@ -89,8 +88,10 @@ func (h *Handler) userSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	render.Status(r, http.StatusOK)
-	render.Render(w, r, &TokenResponse{
-		Tokens: tokens,
+	render.Render(w, r, &AppResponse{
+		HTTPStatusCode: http.StatusOK,
+		Data:           res,
+		Success:        true,
 	})
 }
 
