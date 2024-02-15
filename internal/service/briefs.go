@@ -63,6 +63,10 @@ func (b *BriefsService) GetBriefs(ctx context.Context, predicate *helper.BriefPr
 	return b.repo.GetBriefs(ctx, predicate)
 }
 
+func (b *BriefsService) GetBrief(ctx context.Context, id string) (*domain.Brief, error) {
+	return b.repo.GetBrief(ctx, id)
+}
+
 func (b *BriefsService) DeleteBrief(ctx context.Context, id string) error {
 	return b.repo.DeleteBrief(ctx, id)
 }

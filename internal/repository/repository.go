@@ -41,23 +41,30 @@ type Briefs interface {
 
 	Update(ctx context.Context, brief *domain.Brief) (*domain.Brief, error)
 
-	Get(ctx context.Context, id string) (*domain.Brief, error)
+	GetBrief(ctx context.Context, id string) (*domain.Brief, error)
 
 	GetBriefs(ctx context.Context, predicate *helper.BriefPredicate) ([]*domain.Brief, error)
 
 	DeleteBrief(ctx context.Context, id string) error
 }
+type BriefApplications interface {
+	Create(ctx context.Context, briefapplication *domain.BriefApplication) (*domain.BriefApplication, error)
+
+	GetBriefApplications(ctx context.Context, predicate *helper.BriefApplicationsPredicate) ([]*domain.BriefApplication, error)
+}
 
 type Repositories struct {
-	Users  Users
-	Admins Admins
-	Briefs Briefs
+	Users             Users
+	Admins            Admins
+	Briefs            Briefs
+	BriefApplications BriefApplications
 }
 
 func NewRepositories(db *mongo.Database) *Repositories {
 	return &Repositories{
-		Users:  NewUsersRepo(db),
-		Admins: NewAdminsRepo(db),
-		Briefs: NewBriefsRepo(db),
+		Users:             NewUsersRepo(db),
+		Admins:            NewAdminsRepo(db),
+		Briefs:            NewBriefsRepo(db),
+		BriefApplications: NewBriefApplicationsRepo(db),
 	}
 }

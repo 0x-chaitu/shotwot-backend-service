@@ -18,9 +18,11 @@ func (h *Handler) initBriefsRoutes() http.Handler {
 	r.Route("/", func(r chi.Router) {
 		r.Use(h.parseAdmin)
 		r.Post("/create", h.createBrief)
+		r.Get("/details/{briefId}", h.getBrief)
 		r.Put("/update", h.briefUpdate)
 		r.Post("/list", h.listBriefs)
 		r.Delete("/{briefId}", h.deleteBrief)
+
 	})
 	return r
 
@@ -162,5 +164,33 @@ func (h *Handler) deleteBrief(w http.ResponseWriter, r *http.Request) {
 	render.Render(w, r, &AppResponse{
 		HTTPStatusCode: http.StatusOK,
 		Success:        true,
+	})
+}
+
+func (h *Handler) getBrief(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "briefId")
+
+	if id == "" {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      domain.ErrInvalidInput.Error(),
+		})
+		return
+	}
+
+	ctx := r.Context()
+
+	brief, err := h.services.Briefs.GetBrief(ctx, id)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusInternalServerError,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+	render.Render(w, r, &AppResponse{
+		HTTPStatusCode: http.StatusOK,
+		Success:        true,
+		Data:           brief,
 	})
 }

@@ -78,15 +78,15 @@ func (r *BriefsRepo) Update(ctx context.Context, brief *domain.Brief) (*domain.B
 	return &updatedBrief, decodeErr
 }
 
-func (r *BriefsRepo) Get(ctx context.Context, id string) (*domain.Brief, error) {
-	filter := bson.M{"_id": id}
+func (r *BriefsRepo) GetBrief(ctx context.Context, id string) (*domain.Brief, error) {
+	briedId, _ := primitive.ObjectIDFromHex(id)
+
+	filter := bson.M{"_id": briedId}
 	result := r.db.FindOne(ctx, filter)
-	if err := handleSingleError(result); err != nil {
-		return nil, err
-	}
-	user := domain.User{}
-	decodeErr := result.Decode(&user)
-	return nil, decodeErr
+
+	brief := domain.Brief{}
+	decodeErr := result.Decode(&brief)
+	return &brief, decodeErr
 }
 
 func (r *BriefsRepo) DeleteBrief(ctx context.Context, id string) error {

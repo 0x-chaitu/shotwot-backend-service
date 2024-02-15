@@ -67,7 +67,15 @@ type Briefs interface {
 
 	GetBriefs(ctx context.Context, predicate *helper.BriefPredicate) ([]*domain.Brief, error)
 
+	GetBrief(ctx context.Context, id string) (*domain.Brief, error)
+
 	DeleteBrief(ctx context.Context, id string) error
+}
+
+type BriefApplications interface {
+	Create(ctx context.Context, input *domain.BriefApplicationInput) (*domain.BriefApplicationRes, error)
+
+	GetBriefApplications(ctx context.Context, predicate *helper.BriefApplicationsPredicate) ([]*domain.BriefApplication, error)
 }
 
 type Auth interface {
@@ -82,7 +90,8 @@ type Services struct {
 	Users  Users
 	Admins Admins
 
-	Briefs Briefs
+	Briefs            Briefs
+	BriefApplications BriefApplications
 
 	Auth      Auth
 	AdminAuth AdminAuth
@@ -106,13 +115,15 @@ func NewServices(deps Deps) *Services {
 	adminService := NewAdminsService(deps.Repos.Admins, deps.AdminTokenManager, deps.AccessTokenTTL, deps.RefreshTokenTTL, deps.AuthClient)
 
 	briefService := NewBriefsService(deps.Repos.Briefs, deps.WasabiS3Client)
+	briefApplications := NewBriefApplicationsService(deps.Repos.BriefApplications, deps.WasabiS3Client)
 
 	authService := NewAuthService(deps.TokenManager)
 	adminAuthService := NewAdminAuthService(deps.AdminTokenManager)
 	return &Services{
-		Users:  userService,
-		Admins: adminService,
-		Briefs: briefService,
+		Users:             userService,
+		Admins:            adminService,
+		Briefs:            briefService,
+		BriefApplications: briefApplications,
 
 		Auth:      authService,
 		AdminAuth: adminAuthService,
