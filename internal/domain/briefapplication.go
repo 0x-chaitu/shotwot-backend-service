@@ -26,4 +26,7 @@ type BriefApplication struct {
 	Time     time.Time          `bson:"time,omitempty" json:"time,omitempty"`
 	Opened   bool               `bson:"opened" json:"opened"`
 	Status   int                `bson:"status,omitempty" json:"status,omitempty"`
+	User     *struct {
+		UserName string `bson:"username,omitempty" json:"username,omitempty"`
+	} `bson:"user,omitempty" json:"user,omitempty"`
 }
