@@ -26,7 +26,7 @@ func (h *Handler) createBriefApplication(w http.ResponseWriter, r *http.Request)
 	userIdentity := ctx.Value(userCtx{}).(*jwtauth.CustomClaims)
 	userID := userIdentity.Subject
 
-	var briefInput domain.BriefApplicationInput
+	var briefInput domain.BriefApplication
 	if err := json.NewDecoder(r.Body).Decode(&briefInput); err != nil {
 		render.Render(w, r, &ErrResponse{
 			HTTPStatusCode: http.StatusBadRequest,
@@ -35,10 +35,10 @@ func (h *Handler) createBriefApplication(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	briefInput.BriefApplication.Created = time.Now()
-	briefInput.BriefApplication.UserId = userID
+	briefInput.Created = time.Now()
+	briefInput.UserId = userID
 
-	createdBrief, err := h.services.BriefApplications.Create(ctx, &briefInput)
+	createdBrief, err := h.services.BriefApplications.Create(ctx, briefInput)
 	if err != nil {
 		render.Render(w, r, &ErrResponse{
 			HTTPStatusCode: http.StatusInternalServerError,

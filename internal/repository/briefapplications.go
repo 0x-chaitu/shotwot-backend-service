@@ -3,12 +3,12 @@ package repository
 import (
 	"context"
 	"shotwot_backend/internal/domain"
-	"shotwot_backend/pkg/helper"
 	"shotwot_backend/pkg/logger"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type BriefApplicationsRepo struct {
@@ -32,25 +32,34 @@ func (r *BriefApplicationsRepo) Create(ctx context.Context, briefapplication *do
 	return briefapplication, nil
 }
 
-func (r *BriefApplicationsRepo) GetBriefApplications(ctx context.Context, predicate *helper.BriefApplicationsPredicate) ([]*domain.BriefApplication, error) {
+func (r *BriefApplicationsRepo) GetBriefApplications(ctx context.Context, id string) ([]*domain.BriefApplication, error) {
 
-	pipeline := mongo.Pipeline{
-		bson.D{{Key: "$match", Value: bson.D{{Key: "isActive", Value: predicate.IsActive}}}},
-		bson.D{{Key: "$sort", Value: bson.D{{Key: "created", Value: predicate.Order}}}},
-		bson.D{{Key: "$lookup", Value: bson.D{
-			{Key: "from", Value: "user"},
-			{Key: "localField", Value: "userId"},
-			{Key: "foreignField", Value: "_id"},
-			{Key: "as", Value: "users"},
-		}}},
-		bson.D{{Key: "$lookup", Value: bson.D{
-			{Key: "from", Value: "brief"},
-			{Key: "localField", Value: "briefId"},
-			{Key: "foreignField", Value: "_id"},
-			{Key: "as", Value: "briefs"},
-		}}},
+	// pipeline := mongo.Pipeline{
+	// bson.D{{Key: "$lookup", Value: bson.D{
+	// 	{Key: "from", Value: "brief"},
+	// 	{Key: "localField", Value: "briefId"},
+	// 	{Key: "foreignField", Value: "_id"},
+	// 	{Key: "as", Value: "briefs"},
+	// }}},
+	// bson.D{{Key: "$match", Value: bson.D{{Key: "isActive", Value: predicate.IsActive}}}},
+	// bson.D{{Key: "$sort", Value: bson.D{{Key: "created", Value: predicate.Order}}}},
+	// bson.D{{Key: "$lookup", Value: bson.D{
+	// 	{Key: "from", Value: "user"},
+	// 	{Key: "localField", Value: "userId"},
+	// 	{Key: "foreignField", Value: "_id"},
+	// 	{Key: "as", Value: "users"},
+	// }}},
+	// }
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
 	}
-	cursor, err := r.db.Aggregate(ctx, pipeline)
+	filter := bson.D{{
+		Key:   "briefId",
+		Value: objID,
+	}}
+	opts := options.Find().SetSort(bson.D{{Key: "created", Value: -1}})
+	cursor, err := r.db.Find(ctx, filter, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -58,26 +67,9 @@ func (r *BriefApplicationsRepo) GetBriefApplications(ctx context.Context, predic
 	cursor.SetBatchSize(20)
 
 	var results []*domain.BriefApplication
-	for cursor.Next(ctx) {
-		var briefApp struct {
-			domain.BriefApplication
-			Users  []domain.User  `bson:"users"`
-			Briefs []domain.Brief `bson:"briefs"`
-		}
-		if err := cursor.Decode(&briefApp); err != nil {
-			return nil, err
-		}
-		if len(briefApp.Users) > 0 {
-			briefApp.User = briefApp.Users[0]
-		}
-		if len(briefApp.Briefs) > 0 {
-			briefApp.Brief = briefApp.Briefs[0]
-		}
-		results = append(results, &briefApp.BriefApplication)
-	}
-	if err = cursor.All(context.TODO(), &results); err != nil {
+	if err = cursor.All(ctx, &results); err != nil {
 		return nil, err
 	}
-
+	logger.Info(results)
 	return results, nil
 }

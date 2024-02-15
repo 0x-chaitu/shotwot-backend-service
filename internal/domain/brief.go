@@ -32,7 +32,8 @@ type Brief struct {
 	Created time.Time `bson:"created,omitempty" json:"created,omitempty"`
 	Expiry  time.Time `bson:"expiry,omitempty" json:"expiry,omitempty"`
 
-	IsActive bool `bson:"isActive" json:"isActive"`
+	IsActive    bool `bson:"isActive" json:"isActive"`
+	TotalAssets int  `bson:"assets" json:"assets"`
 
 	// ActivatedOn *time.Time `bson:"activated_on,omitempty" json:"activatedOn,omitempty"`
 	// DeactivedOn *time.Time `bson:"deactivated_on,omitempty" json:"deactivatedOn,omitempty"`

@@ -48,7 +48,7 @@ func (r *BriefsRepo) GetBriefs(ctx context.Context, predicate *helper.BriefPredi
 	cursor.SetBatchSize(20)
 
 	var results []*domain.Brief
-	if err = cursor.All(context.TODO(), &results); err != nil {
+	if err = cursor.All(ctx, &results); err != nil {
 		return nil, err
 	}
 
