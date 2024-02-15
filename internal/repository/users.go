@@ -70,6 +70,21 @@ func (r *UsersRepo) Get(ctx context.Context, id string) (*domain.User, error) {
 	return &user, decodeErr
 }
 
+func (r *UsersRepo) GetOrCreate(ctx context.Context, user *domain.User) (*domain.User, error) {
+	filter := bson.M{"_id": user.Id}
+	result := r.db.FindOne(ctx, filter)
+	if result.Err() != nil {
+		if result.Err() == mongo.ErrNoDocuments {
+			_, err := r.db.InsertOne(ctx, user)
+			return user, err
+		} else {
+			return nil, result.Err()
+		}
+	}
+	decodeErr := result.Decode(user)
+	return user, decodeErr
+}
+
 func (r *UsersRepo) Download(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error) {
 	opts := options.Find().SetSort(bson.D{{Key: "created", Value: -1}})
 	// filter := bson.M{"created": bson.M{"$gte": predicate.StartDate,

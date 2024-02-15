@@ -18,14 +18,19 @@ type AccountAuthInput struct {
 	Role     int    `json:"role"`
 }
 
+type AuthResponse struct {
+	*Tokens
+	User *domain.User `json:"user"`
+}
+
 type Tokens struct {
 	AccessToken  string `json:"accesstoken"`
 	RefreshToken string `json:"refreshtoken"`
 }
 
 type Users interface {
-	SignUp(ctx context.Context, input AccountAuthInput) (*Tokens, error)
-	SignIn(ctx context.Context, input AccountAuthInput) (*Tokens, error)
+	SignUp(ctx context.Context, input AccountAuthInput) (*AuthResponse, error)
+	SignIn(ctx context.Context, input AccountAuthInput) (*AuthResponse, error)
 	Update(ctx context.Context, input *domain.User) (*domain.User, error)
 	GetUser(ctx context.Context, id string) (*domain.User, error)
 	Delete(ctx context.Context, id string) error
@@ -38,7 +43,7 @@ type Users interface {
 
 	Download(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error)
 
-	// RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error)
+	// RefreshAuthResponse(ctx context.Context, refreshToken string) (AuthResponse, error)
 	// Verify(ctx context.Context, userID primitive.ObjectID, hash string) error
 }
 
@@ -51,7 +56,7 @@ type Admins interface {
 
 	GetAllAdmins(ctx context.Context) ([]*domain.Admin, error)
 
-	// RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error)
+	// RefreshAuthResponse(ctx context.Context, refreshToken string) (AuthResponse, error)
 	// Verify(ctx context.Context, userID primitive.ObjectID, hash string) error
 }
 

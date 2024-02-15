@@ -15,6 +15,8 @@ type Users interface {
 
 	Get(ctx context.Context, id string) (*domain.User, error)
 
+	GetOrCreate(ctx context.Context, user *domain.User) (*domain.User, error)
+
 	GetUsers(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error)
 
 	TotalUsers(ctx context.Context) (int64, error)
