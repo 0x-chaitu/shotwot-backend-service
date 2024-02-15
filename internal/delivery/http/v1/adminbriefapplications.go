@@ -12,7 +12,7 @@ import (
 func (h *Handler) initAdminBriefApplicationsRoutes() http.Handler {
 	r := chi.NewRouter()
 	r.Route("/", func(r chi.Router) {
-		// r.Use(h.parseAdmin)
+		r.Use(h.parseAdmin)
 		r.Post("/list", h.listBriefApplications)
 
 	})
