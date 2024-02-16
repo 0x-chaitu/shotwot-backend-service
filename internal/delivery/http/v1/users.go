@@ -132,8 +132,11 @@ func (h *Handler) getUser(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	render.Status(r, http.StatusOK)
-	render.Render(w, r, user)
+	render.Render(w, r, &AppResponse{
+		HTTPStatusCode: http.StatusOK,
+		Success:        true,
+		Data:           user,
+	})
 }
 
 func (h *Handler) deleteUser(w http.ResponseWriter, r *http.Request) {
