@@ -78,6 +78,11 @@ type BriefApplications interface {
 	GetBriefApplications(ctx context.Context, id string) ([]*domain.BriefApplication, error)
 }
 
+type SavedBriefs interface {
+	CreateOrUpdate(ctx context.Context, input *domain.SavedBriefInput) (*domain.SavedBriefRes, error)
+	GetSavedBriefs(ctx context.Context, userId string) ([]*domain.SavedBrief, error)
+}
+
 type Auth interface {
 	UserIdentity(token string) (*jwtauth.CustomClaims, error)
 }
@@ -92,6 +97,7 @@ type Services struct {
 
 	Briefs            Briefs
 	BriefApplications BriefApplications
+	SavedBriefs       SavedBriefs
 
 	Auth      Auth
 	AdminAuth AdminAuth
@@ -116,6 +122,7 @@ func NewServices(deps Deps) *Services {
 
 	briefService := NewBriefsService(deps.Repos.Briefs, deps.WasabiS3Client)
 	briefApplications := NewBriefApplicationsService(deps.Repos.BriefApplications, deps.WasabiS3Client)
+	savedBriefs := NewSavedBriefsService(deps.Repos.SavedBriefs)
 
 	authService := NewAuthService(deps.TokenManager)
 	adminAuthService := NewAdminAuthService(deps.AdminTokenManager)
@@ -124,6 +131,7 @@ func NewServices(deps Deps) *Services {
 		Admins:            adminService,
 		Briefs:            briefService,
 		BriefApplications: briefApplications,
+		SavedBriefs:       savedBriefs,
 
 		Auth:      authService,
 		AdminAuth: adminAuthService,

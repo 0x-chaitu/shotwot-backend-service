@@ -52,12 +52,18 @@ type BriefApplications interface {
 
 	GetBriefApplications(ctx context.Context, id string) ([]*domain.BriefApplication, error)
 }
+type SavedBriefs interface {
+	CreateOrUpdate(ctx context.Context, savedBriefs *domain.SavedBrief) (*domain.SavedBrief, error)
+	Create(ctx context.Context, savedBriefs *domain.SavedBrief) (*domain.SavedBrief, error)
+	GetSavedBriefs(ctx context.Context, userId string) ([]*domain.SavedBrief, error)
+}
 
 type Repositories struct {
 	Users             Users
 	Admins            Admins
 	Briefs            Briefs
 	BriefApplications BriefApplications
+	SavedBriefs       SavedBriefs
 }
 
 func NewRepositories(db *mongo.Database) *Repositories {
@@ -66,5 +72,6 @@ func NewRepositories(db *mongo.Database) *Repositories {
 		Admins:            NewAdminsRepo(db),
 		Briefs:            NewBriefsRepo(db),
 		BriefApplications: NewBriefApplicationsRepo(db),
+		SavedBriefs:       NewSavedBriefsRepo(db),
 	}
 }

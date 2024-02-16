@@ -22,8 +22,12 @@ func (h *Handler) initUsersRoutes() http.Handler {
 		r.Use(h.parseUser)
 		r.Put("/update", h.userUpdate)
 		r.Delete("/delete", h.deleteUser)
-		r.Mount("/briefapplications", h.initBriefApplicationsRoutes())
 		r.Get("/{userId}", h.getUser)
+
+		// Mount
+		r.Mount("/briefapplications", h.initBriefApplicationsRoutes())
+		r.Mount("/savedbriefs", h.initSavedBriefsRoutes())
+
 	})
 	return r
 
