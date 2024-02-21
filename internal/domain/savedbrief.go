@@ -14,7 +14,6 @@ type SavedBrief struct {
 	Updated time.Time          `bson:"updated,omitempty" json:"updated,omitempty"`
 	Status  bool               `bson:"status" json:"status"`
 	User    User               `bson:"user,omitempty" json:"-"`
-	Brief   Brief              `bson:"brief,omitempty" json:"brief"`
 }
 
 func NewSavedBrief() *SavedBrief {

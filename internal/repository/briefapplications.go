@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type BriefApplicationsRepo struct {
@@ -31,16 +32,29 @@ func (r *BriefApplicationsRepo) Create(ctx context.Context, briefapplication *do
 	return briefapplication, nil
 }
 
+func (r *BriefApplicationsRepo) Update(ctx context.Context, application *domain.BriefApplication) (*domain.BriefApplication, error) {
+	filter := bson.M{"_id": application.Id}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "status", Value: application.Status}}}}
+	after := options.After
+	opt := options.FindOneAndUpdateOptions{
+		ReturnDocument: &after,
+	}
+	updatedResult := r.db.FindOneAndUpdate(ctx, filter, update, &opt)
+	if err := handleSingleError(updatedResult); err != nil {
+		return nil, err
+	}
+	updatedBrief := domain.BriefApplication{}
+	decodeErr := updatedResult.Decode(&updatedBrief)
+	return &updatedBrief, decodeErr
+}
+
 func (r *BriefApplicationsRepo) GetBriefApplications(ctx context.Context, id string) ([]*domain.BriefApplication, error) {
 
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
-	// filter := bson.D{{
-	// 	Key:   "briefId",
-	// 	Value: objID,
-	// }}
+
 	pipeline := mongo.Pipeline{
 		{{Key: "$match", Value: bson.D{{Key: "briefId",
 			Value: objID}}}},
@@ -61,7 +75,6 @@ func (r *BriefApplicationsRepo) GetBriefApplications(ctx context.Context, id str
 			},
 		}},
 	}
-	// opts := options.Find().SetSort(bson.D{{Key: "created", Value: -1}})
 	cursor, err := r.db.Aggregate(ctx, pipeline)
 	if err != nil {
 		return nil, err
@@ -74,4 +87,35 @@ func (r *BriefApplicationsRepo) GetBriefApplications(ctx context.Context, id str
 		return nil, err
 	}
 	return results, nil
+}
+
+func (r *BriefApplicationsRepo) GetBriefApplication(ctx context.Context, id string) (*domain.UserBriefAppliedDetails, error) {
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	pipeline := mongo.Pipeline{
+		{{Key: "$match", Value: bson.D{{Key: "_id",
+			Value: objID}}}},
+		{{Key: "$lookup", Value: bson.D{
+			{Key: "from", Value: "user"},
+			{Key: "localField", Value: "userId"},
+			{Key: "foreignField", Value: "_id"},
+			{Key: "as", Value: "user"},
+		}}},
+		{{Key: "$unwind", Value: "$user"}},
+	}
+	cursor, err := r.db.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+	cursor.SetBatchSize(20)
+
+	var result []*domain.UserBriefAppliedDetails
+	if err = cursor.All(ctx, &result); err != nil {
+		return nil, err
+	}
+	return result[0], nil
+
 }

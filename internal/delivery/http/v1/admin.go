@@ -31,8 +31,6 @@ func (h *Handler) initAdminRoutes() http.Handler {
 		r.Put("/update", h.adminUpdate)
 		r.Get("/list", h.getAllAdmin)
 		r.Delete("/delete", h.deleteAdmin)
-		r.Mount("/brief", h.initBriefsRoutes())
-		r.Mount("/briefapplication", h.initAdminBriefApplicationsRoutes())
 
 	})
 	return r

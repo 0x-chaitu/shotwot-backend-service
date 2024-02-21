@@ -58,7 +58,11 @@ func NewHandler(services *service.Services) *Handler {
 func (h *Handler) Init() http.Handler {
 	r := chi.NewRouter()
 	r.Mount("/users", h.initUsersRoutes())
+	r.Mount("/user/briefs", h.initUserBriefRoutes())
+
 	r.Mount("/admin", h.initAdminRoutes())
+	r.Mount("/admin/briefs", h.initBriefsRoutes())
+	r.Mount("/admin/brief/", h.initBriefApplicationRoutes())
 
 	return r
 }

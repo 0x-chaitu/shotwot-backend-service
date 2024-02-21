@@ -34,3 +34,11 @@ func (b *BriefApplicationsService) Create(ctx context.Context, input domain.Brie
 func (b *BriefApplicationsService) GetBriefApplications(ctx context.Context, id string) ([]*domain.BriefApplication, error) {
 	return b.repo.GetBriefApplications(ctx, id)
 }
+
+func (b *BriefApplicationsService) GetBriefApplication(ctx context.Context, id string) (*domain.UserBriefAppliedDetails, error) {
+	return b.repo.GetBriefApplication(ctx, id)
+}
+
+func (b *BriefApplicationsService) UpdateBriefApplication(ctx context.Context, input *domain.BriefApplication) (*domain.BriefApplication, error) {
+	return b.repo.Update(ctx, input)
+}

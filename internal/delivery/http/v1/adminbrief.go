@@ -22,7 +22,6 @@ func (h *Handler) initBriefsRoutes() http.Handler {
 		r.Put("/update", h.briefUpdate)
 		r.Post("/list", h.listBriefs)
 		r.Delete("/{briefId}", h.deleteBrief)
-
 	})
 	return r
 

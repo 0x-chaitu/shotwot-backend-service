@@ -25,8 +25,8 @@ func (h *Handler) initUsersRoutes() http.Handler {
 		r.Get("/{userId}", h.getUser)
 
 		// Mount
-		r.Mount("/briefapplications", h.initBriefApplicationsRoutes())
-		r.Mount("/savedbriefs", h.initSavedBriefsRoutes())
+		// r.Mount("/briefapplications", h.initBriefApplicationsRoutes())
+		// r.Mount("/savedbriefs", h.initSavedBriefsRoutes())
 
 	})
 	return r
