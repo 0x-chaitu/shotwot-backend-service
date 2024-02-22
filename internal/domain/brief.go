@@ -18,10 +18,10 @@ type Brief struct {
 	Priority     int                `bson:"priority" json:"priority"`
 
 	// timelapse, adventure, abstract
-	Camera     []string `bson:"camera" json:"camera"`
-	Resolution string   `bson:"resolution" json:"resolution"`
-	FrameRate  string   `bson:"frameRate" json:"frameRate"`
-	Duration   string   `bson:"duration" json:"duration"`
+	Camera     *CameraType `bson:"camera" json:"camera"`
+	Resolution string      `bson:"resolution" json:"resolution"`
+	FrameRate  string      `bson:"frameRate" json:"frameRate"`
+	Duration   string      `bson:"duration" json:"duration"`
 	// 0 is indoor, 1 outdoor, 2 studio
 	LightSetup []string `bson:"lightSetup" json:"lightSetup"`
 	// audio, video, photo
@@ -37,6 +37,11 @@ type Brief struct {
 
 	// ActivatedOn *time.Time `bson:"activated_on,omitempty" json:"activatedOn,omitempty"`
 	// DeactivedOn *time.Time `bson:"deactivated_on,omitempty" json:"deactivatedOn,omitempty"`
+}
+
+type CameraType struct {
+	Mobile bool `bson:"Mobile" json:"Mobile"`
+	Dslr   bool `bson:"DSLR" json:"DSLR"`
 }
 
 type ShotwotIdeas struct {
