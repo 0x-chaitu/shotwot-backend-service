@@ -23,7 +23,7 @@ func NewServer(cfg *config.Config, handler http.Handler) *Server {
 }
 
 func (s *Server) Run() error {
-	return s.httpServer.ListenAndServe()
+	return s.httpServer.ListenAndServeTLS("server.crt", "server.key")
 }
 
 func (s *Server) Stop(ctx context.Context) error {
