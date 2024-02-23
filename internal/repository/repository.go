@@ -63,12 +63,18 @@ type SavedBriefs interface {
 	GetSavedBriefs(ctx context.Context, userId string) ([]*domain.SavedBrief, error)
 }
 
+type MasterClass interface {
+	CreatePlaylist(ctx context.Context, playlist *domain.Playlist) (*domain.Playlist, error)
+	GetPlaylists(ctx context.Context, predicate *helper.PlaylistPredicate) ([]*domain.Playlist, error)
+}
+
 type Repositories struct {
 	Users             Users
 	Admins            Admins
 	Briefs            Briefs
 	BriefApplications BriefApplications
 	SavedBriefs       SavedBriefs
+	MasterClass       MasterClass
 }
 
 func NewRepositories(db *mongo.Database) *Repositories {
@@ -78,5 +84,6 @@ func NewRepositories(db *mongo.Database) *Repositories {
 		Briefs:            NewBriefsRepo(db),
 		BriefApplications: NewBriefApplicationsRepo(db),
 		SavedBriefs:       NewSavedBriefsRepo(db),
+		MasterClass:       NewMasterClassRepo(db),
 	}
 }

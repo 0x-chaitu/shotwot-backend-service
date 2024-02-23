@@ -84,6 +84,7 @@ type BriefApplications interface {
 
 type SavedBriefs interface {
 	CreateOrUpdate(ctx context.Context, input *domain.SavedBriefInput) (*domain.SavedBriefRes, error)
+
 	GetSavedBriefs(ctx context.Context, userId string) ([]*domain.SavedBrief, error)
 }
 
@@ -95,6 +96,11 @@ type AdminAuth interface {
 	AdminIdentity(token string) (*jwtauth.CustomAdminClaims, error)
 }
 
+type MasterClass interface {
+	CreatePlaylist(ctx context.Context, input *domain.PlaylistInput) (*domain.PlaylistResp, error)
+	GetPlaylists(ctx context.Context, predicate *helper.PlaylistPredicate) ([]*domain.Playlist, error)
+}
+
 type Services struct {
 	Users  Users
 	Admins Admins
@@ -102,6 +108,7 @@ type Services struct {
 	Briefs            Briefs
 	BriefApplications BriefApplications
 	SavedBriefs       SavedBriefs
+	MasterClass       MasterClass
 
 	Auth      Auth
 	AdminAuth AdminAuth
@@ -127,6 +134,7 @@ func NewServices(deps Deps) *Services {
 	briefService := NewBriefsService(deps.Repos.Briefs, deps.WasabiS3Client)
 	briefApplications := NewBriefApplicationsService(deps.Repos.BriefApplications, deps.WasabiS3Client)
 	savedBriefs := NewSavedBriefsService(deps.Repos.SavedBriefs)
+	masterClass := NewMasterClassService(deps.Repos.MasterClass, deps.WasabiS3Client)
 
 	authService := NewAuthService(deps.TokenManager)
 	adminAuthService := NewAdminAuthService(deps.AdminTokenManager)
@@ -136,6 +144,7 @@ func NewServices(deps Deps) *Services {
 		Briefs:            briefService,
 		BriefApplications: briefApplications,
 		SavedBriefs:       savedBriefs,
+		MasterClass:       masterClass,
 
 		Auth:      authService,
 		AdminAuth: adminAuthService,
