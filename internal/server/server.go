@@ -23,6 +23,10 @@ func NewServer(cfg *config.Config, handler http.Handler) *Server {
 }
 
 func (s *Server) Run() error {
+	go func() {
+		s.httpServer.Addr = ":8001"
+		s.httpServer.ListenAndServe()
+	}()
 	return s.httpServer.ListenAndServeTLS("server.crt", "server.key")
 }
 
