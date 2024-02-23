@@ -20,7 +20,7 @@ type User struct {
 	LastName     string    `bson:"lastname" json:"lastname"`
 	Email        string    `bson:"email,omitempty" json:"email,omitempty" `
 	Mobile       string    `bson:"mobile" json:"mobile"`
-	ShowReel     string    `bson:"showreel" json:"showreel"`
+	ShowReel     []string  `bson:"showreel" json:"showreel"`
 	ProfileImage string    `bson:"profileimage" json:"profileimage"`
 	Bio          string    `bson:"bio" json:"bio"`
 	Address      Address   `bson:"address" json:"address"`

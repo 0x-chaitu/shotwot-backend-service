@@ -116,6 +116,9 @@ func (r *BriefApplicationsRepo) GetBriefApplication(ctx context.Context, id stri
 	if err = cursor.All(ctx, &result); err != nil {
 		return nil, err
 	}
-	return result[0], nil
+	if len(result) > 0 {
+		return result[0], nil
+	}
+	return nil, nil
 
 }
