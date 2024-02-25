@@ -32,8 +32,6 @@ func (h *Handler) initAdminRoutes() http.Handler {
 		r.Get("/list", h.getAllAdmin)
 		r.Delete("/delete", h.deleteAdmin)
 
-		// Mount
-		r.Mount("/masterclass", h.initAdminMasterClassRoutes())
 	})
 	return r
 
