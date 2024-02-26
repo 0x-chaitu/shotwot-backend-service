@@ -132,7 +132,7 @@ func (r *BriefApplicationsRepo) GetBriefApplication(ctx context.Context, id stri
 
 }
 
-func (r *BriefApplicationsRepo) GetUserBriefApplications(ctx context.Context, id string) (*domain.UserBriefAppliedDetails, error) {
+func (r *BriefApplicationsRepo) GetUserBriefApplications(ctx context.Context, id string) ([]*domain.UserBriefAppliedDetails, error) {
 	pipeline := mongo.Pipeline{
 		{{Key: "$match", Value: bson.D{{Key: "userId",
 			Value: id}}}},
@@ -159,7 +159,7 @@ func (r *BriefApplicationsRepo) GetUserBriefApplications(ctx context.Context, id
 		return nil, err
 	}
 	if len(result) > 0 {
-		return result[0], nil
+		return result, nil
 	}
 	return nil, nil
 

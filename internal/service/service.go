@@ -81,7 +81,7 @@ type BriefApplications interface {
 
 	GetBriefApplication(ctx context.Context, id string) (*domain.UserBriefAppliedDetails, error)
 
-	GetUserBriefApplications(ctx context.Context, id string) (*domain.UserBriefAppliedDetails, error)
+	GetUserBriefApplications(ctx context.Context, id string) ([]*domain.UserBriefAppliedDetails, error)
 }
 
 type SavedBriefs interface {

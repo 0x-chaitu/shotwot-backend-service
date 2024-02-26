@@ -42,6 +42,6 @@ func (b *BriefApplicationsService) GetBriefApplication(ctx context.Context, id s
 func (b *BriefApplicationsService) UpdateBriefApplication(ctx context.Context, input *domain.BriefApplication) (*domain.BriefApplication, error) {
 	return b.repo.Update(ctx, input)
 }
-func (b *BriefApplicationsService) GetUserBriefApplications(ctx context.Context, id string) (*domain.UserBriefAppliedDetails, error) {
+func (b *BriefApplicationsService) GetUserBriefApplications(ctx context.Context, id string) ([]*domain.UserBriefAppliedDetails, error) {
 	return b.repo.GetUserBriefApplications(ctx, id)
 }
