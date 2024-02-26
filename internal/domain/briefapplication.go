@@ -42,4 +42,5 @@ type UserBriefAppliedDetails struct {
 	Opened  bool               `bson:"opened" json:"opened"`
 	Status  int                `bson:"status,omitempty" json:"status,omitempty"`
 	User    *User              `bson:"user,omitempty" json:"user,omitempty"`
+	Brief   *Brief             `bson:"brief,omitempty" json:"brief,omitempty"`
 }

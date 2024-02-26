@@ -55,6 +55,8 @@ type BriefApplications interface {
 	GetBriefApplications(ctx context.Context, id string) ([]*domain.BriefApplication, error)
 
 	GetBriefApplication(ctx context.Context, id string) (*domain.UserBriefAppliedDetails, error)
+
+	GetUserBriefApplications(ctx context.Context, id string) (*domain.UserBriefAppliedDetails, error)
 }
 
 type SavedBriefs interface {

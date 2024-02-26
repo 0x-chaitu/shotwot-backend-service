@@ -104,9 +104,17 @@ func (r *BriefApplicationsRepo) GetBriefApplication(ctx context.Context, id stri
 			{Key: "as", Value: "user"},
 		}}},
 		{{Key: "$unwind", Value: "$user"}},
+		{{Key: "$lookup", Value: bson.D{
+			{Key: "from", Value: "brief"},
+			{Key: "localField", Value: "briefId"},
+			{Key: "foreignField", Value: "_id"},
+			{Key: "as", Value: "brief"},
+		}}},
+		{{Key: "$unwind", Value: "$brief"}},
 	}
 	cursor, err := r.db.Aggregate(ctx, pipeline)
 	if err != nil {
+		logger.Error(err)
 		return nil, err
 	}
 	defer cursor.Close(ctx)
@@ -114,6 +122,40 @@ func (r *BriefApplicationsRepo) GetBriefApplication(ctx context.Context, id stri
 
 	var result []*domain.UserBriefAppliedDetails
 	if err = cursor.All(ctx, &result); err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+	if len(result) > 0 {
+		return result[0], nil
+	}
+	return nil, nil
+
+}
+
+func (r *BriefApplicationsRepo) GetUserBriefApplications(ctx context.Context, id string) (*domain.UserBriefAppliedDetails, error) {
+	pipeline := mongo.Pipeline{
+		{{Key: "$match", Value: bson.D{{Key: "userId",
+			Value: id}}}},
+		{{Key: "$lookup", Value: bson.D{
+			{Key: "from", Value: "brief"},
+			{Key: "localField", Value: "briefId"},
+			{Key: "foreignField", Value: "_id"},
+			{Key: "as", Value: "brief"},
+		}}},
+		{{Key: "$unwind", Value: "$brief"}},
+		{{Key: "$sort", Value: bson.M{"created": -1}}},
+	}
+	cursor, err := r.db.Aggregate(ctx, pipeline)
+	if err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+	cursor.SetBatchSize(20)
+
+	var result []*domain.UserBriefAppliedDetails
+	if err = cursor.All(ctx, &result); err != nil {
+		logger.Error(err)
 		return nil, err
 	}
 	if len(result) > 0 {

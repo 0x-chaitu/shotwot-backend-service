@@ -20,6 +20,7 @@ func (h *Handler) initUserBriefRoutes() http.Handler {
 		r.Post("/save", h.saveBrief)
 		r.Get("/list/saved", h.listSavedBriefs)
 		r.Get("/list", h.listBriefsUser)
+		r.Get("/list/applied", h.getUserAppliedBriefs)
 	})
 	return r
 }
@@ -32,6 +33,25 @@ func (h *Handler) listBriefsUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	briefList, err := h.services.Briefs.GetBriefs(r.Context(), &predicate)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusInternalServerError,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+	render.Render(w, r, &AppResponse{
+		HTTPStatusCode: http.StatusOK,
+		Success:        true,
+		Data:           briefList,
+	})
+}
+
+func (h *Handler) getUserAppliedBriefs(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userIdentity := ctx.Value(userCtx{}).(*jwtauth.CustomClaims)
+	userID := userIdentity.Subject
+	briefList, err := h.services.BriefApplications.GetUserBriefApplications(r.Context(), userID)
 	if err != nil {
 		render.Render(w, r, &ErrResponse{
 			HTTPStatusCode: http.StatusInternalServerError,
