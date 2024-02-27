@@ -84,6 +84,10 @@ type BriefApplications interface {
 	GetUserBriefApplications(ctx context.Context, id string) ([]*domain.UserBriefAppliedDetails, error)
 }
 
+type Assets interface {
+	Create(ctx context.Context, asset *domain.AssetInput) (*domain.AssetRes, error)
+}
+
 type SavedBriefs interface {
 	CreateOrUpdate(ctx context.Context, input *domain.SavedBriefInput) (*domain.SavedBriefRes, error)
 
@@ -111,6 +115,7 @@ type Services struct {
 	BriefApplications BriefApplications
 	SavedBriefs       SavedBriefs
 	MasterClass       MasterClass
+	Assets            Assets
 
 	Auth      Auth
 	AdminAuth AdminAuth
@@ -137,6 +142,7 @@ func NewServices(deps Deps) *Services {
 	briefApplications := NewBriefApplicationsService(deps.Repos.BriefApplications, deps.WasabiS3Client)
 	savedBriefs := NewSavedBriefsService(deps.Repos.SavedBriefs)
 	masterClass := NewMasterClassService(deps.Repos.MasterClass, deps.WasabiS3Client)
+	assetServie := NewAssetsService(deps.Repos.Assets, deps.WasabiS3Client)
 
 	authService := NewAuthService(deps.TokenManager)
 	adminAuthService := NewAdminAuthService(deps.AdminTokenManager)
@@ -147,6 +153,7 @@ func NewServices(deps Deps) *Services {
 		BriefApplications: briefApplications,
 		SavedBriefs:       savedBriefs,
 		MasterClass:       masterClass,
+		Assets:            assetServie,
 
 		Auth:      authService,
 		AdminAuth: adminAuthService,

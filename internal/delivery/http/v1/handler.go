@@ -59,6 +59,7 @@ func (h *Handler) Init() http.Handler {
 	r := chi.NewRouter()
 	r.Mount("/users", h.initUsersRoutes())
 	r.Mount("/user/briefs", h.initUserBriefRoutes())
+	r.Mount("/user/assets", h.initUserAssetsRoutes())
 
 	r.Mount("/admin", h.initAdminRoutes())
 	r.Mount("/admin/briefs", h.initBriefsRoutes())

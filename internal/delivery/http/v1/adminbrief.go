@@ -40,6 +40,9 @@ func (h *Handler) createBrief(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var brief domain.BriefInput
 	err := decoder.Decode(&brief)
+	if brief.Brief == nil {
+		brief.Brief = &domain.Brief{}
+	}
 	brief.Created = time.Now()
 	brief.CreatedBy = adminIdentity.Subject
 	if err != nil {
