@@ -25,7 +25,7 @@ func (b *AssetsService) Create(ctx context.Context, input *domain.AssetInput) (*
 	var urls = []string{}
 	timeKey := time.Now().Format("20060102150405")
 	for _, file := range input.Files {
-		key := "app/brief/" + timeKey + "/" + file.Name
+		key := "Warehouse@cloud/Shotwot Originals/" + input.BriefId.String() + input.UserId + timeKey + "/" + file.Name
 		url, err := b.s3.PresignedUrl(key, file.Filetype)
 		if err != nil {
 			return nil, err

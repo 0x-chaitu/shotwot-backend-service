@@ -60,7 +60,7 @@ func (r *AdminsRepo) GetAdmins(ctx context.Context) ([]*domain.Admin, error) {
 		return nil, err
 	}
 	defer cursor.Close(ctx)
-	cursor.SetBatchSize(20)
+	// cursor.SetBatchSize(20)
 
 	var results []*domain.Admin
 	if err = cursor.All(context.TODO(), &results); err != nil {

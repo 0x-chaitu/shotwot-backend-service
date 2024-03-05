@@ -52,7 +52,7 @@ func (r *MasterClassRepo) GetPlaylists(ctx context.Context, predicate *helper.Pl
 		return nil, err
 	}
 	defer cursor.Close(ctx)
-	cursor.SetBatchSize(20)
+	// cursor.SetBatchSize(20)
 
 	var results []*domain.Playlist
 	if err = cursor.All(ctx, &results); err != nil {

@@ -168,7 +168,7 @@ func (r *UsersRepo) GetUsers(ctx context.Context, predicate *helper.UsersPredica
 		return nil, err
 	}
 	defer cursor.Close(ctx)
-	cursor.SetBatchSize(100)
+	// cursor.SetBatchSize(100)
 
 	results := []*domain.User{}
 

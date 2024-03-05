@@ -13,17 +13,29 @@ import (
 )
 
 type BriefsRepo struct {
-	db *mongo.Collection
+	db          *mongo.Collection
+	archievedDb *mongo.Collection
 }
 
 func NewBriefsRepo(db *mongo.Database) *BriefsRepo {
 	return &BriefsRepo{
-		db: db.Collection("brief"),
+		db:          db.Collection("brief"),
+		archievedDb: db.Collection("draftBrief"),
 	}
 }
 
 func (r *BriefsRepo) Create(ctx context.Context, brief *domain.Brief) (*domain.Brief, error) {
 	result, err := r.db.InsertOne(ctx, brief)
+	if err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+	brief.Id = result.InsertedID.(primitive.ObjectID)
+	return brief, nil
+}
+
+func (r *BriefsRepo) CreateDraft(ctx context.Context, brief *domain.Brief) (*domain.Brief, error) {
+	result, err := r.archievedDb.InsertOne(ctx, brief)
 	if err != nil {
 		logger.Error(err)
 		return nil, err
@@ -45,7 +57,7 @@ func (r *BriefsRepo) GetBriefs(ctx context.Context, predicate *helper.BriefPredi
 		return nil, err
 	}
 	defer cursor.Close(ctx)
-	cursor.SetBatchSize(20)
+	// cursor.SetBatchSize(20)
 
 	var results []*domain.Brief
 	if err = cursor.All(ctx, &results); err != nil {
@@ -71,6 +83,7 @@ func (r *BriefsRepo) Update(ctx context.Context, brief *domain.Brief) (*domain.B
 	}
 	updatedResult := r.db.FindOneAndUpdate(ctx, filter, update, &opt)
 	if err := handleSingleError(updatedResult); err != nil {
+		logger.Info(err)
 		return nil, err
 	}
 	updatedBrief := domain.Brief{}

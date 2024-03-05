@@ -80,7 +80,7 @@ func (r *BriefApplicationsRepo) GetBriefApplications(ctx context.Context, id str
 		return nil, err
 	}
 	defer cursor.Close(ctx)
-	cursor.SetBatchSize(20)
+	// cursor.SetBatchSize(20)
 
 	var results []*domain.BriefApplication
 	if err = cursor.All(ctx, &results); err != nil {
@@ -118,7 +118,7 @@ func (r *BriefApplicationsRepo) GetBriefApplication(ctx context.Context, id stri
 		return nil, err
 	}
 	defer cursor.Close(ctx)
-	cursor.SetBatchSize(20)
+	// cursor.SetBatchSize(20)
 
 	var result []*domain.UserBriefAppliedDetails
 	if err = cursor.All(ctx, &result); err != nil {
@@ -151,7 +151,7 @@ func (r *BriefApplicationsRepo) GetUserBriefApplications(ctx context.Context, id
 		return nil, err
 	}
 	defer cursor.Close(ctx)
-	cursor.SetBatchSize(20)
+	// cursor.SetBatchSize(20)
 
 	var result []*domain.UserBriefAppliedDetails
 	if err = cursor.All(ctx, &result); err != nil {
