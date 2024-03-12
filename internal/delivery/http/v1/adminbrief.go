@@ -22,6 +22,8 @@ func (h *Handler) initBriefsRoutes() http.Handler {
 		r.Put("/update", h.briefUpdate)
 		r.Post("/list", h.listBriefs)
 		r.Delete("/{briefId}", h.deleteBrief)
+
+		r.Post("/drafts/create", h.createDraft)
 	})
 	return r
 
@@ -55,6 +57,49 @@ func (h *Handler) createBrief(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resBrief, err := h.services.Briefs.Create(ctx, &brief)
+	if err != nil {
+		logger.Error(err)
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusInternalServerError,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+	render.Render(w, r, &AppResponse{
+		HTTPStatusCode: http.StatusOK,
+		Success:        true,
+		Data:           resBrief,
+	})
+}
+
+func (h *Handler) createDraft(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	adminIdentity := ctx.Value(adminCtx{}).(*jwtauth.CustomAdminClaims)
+	if !(adminIdentity.AdminRole == jwtauth.SuperAdmin ||
+		adminIdentity.AdminRole == jwtauth.Admin || adminIdentity.AdminRole == jwtauth.BriefManager) {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      "not enough permissions",
+		})
+	}
+	decoder := json.NewDecoder(r.Body)
+	var brief domain.BriefInput
+	err := decoder.Decode(&brief)
+	if brief.Brief == nil {
+		brief.Brief = &domain.Brief{}
+	}
+	brief.Created = time.Now()
+	brief.CreatedBy = adminIdentity.Subject
+	if err != nil {
+		logger.Errorf("Error in decoding brief %v", err)
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+
+	resBrief, err := h.services.Briefs.CreateDraft(ctx, &brief)
 	if err != nil {
 		logger.Error(err)
 		render.Render(w, r, &ErrResponse{

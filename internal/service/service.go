@@ -70,6 +70,8 @@ type Briefs interface {
 	GetBrief(ctx context.Context, id string) (*domain.Brief, error)
 
 	DeleteBrief(ctx context.Context, id string) error
+
+	CreateDraft(ctx context.Context, brief *domain.BriefInput) (*domain.BriefRes, error)
 }
 
 type BriefApplications interface {

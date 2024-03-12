@@ -23,7 +23,7 @@ type Brief struct {
 	FrameRate  string      `bson:"frameRate" json:"frameRate"`
 	Duration   string      `bson:"duration" json:"duration"`
 	// 0 is indoor, 1 outdoor, 2 studio
-	LightSetup []string `bson:"lightSetup" json:"lightSetup"`
+	LightSetup *LightSetup `bson:"lightSetup" json:"lightSetup"`
 	// audio, video, photo
 	Type string `bson:"type" json:"type"`
 
@@ -42,6 +42,12 @@ type Brief struct {
 type CameraType struct {
 	Mobile bool `bson:"Mobile" json:"Mobile"`
 	Dslr   bool `bson:"DSLR" json:"DSLR"`
+}
+
+type LightSetup struct {
+	Studio  bool `bson:"studio" json:"Studio"`
+	Indoor  bool `bson:"indoor" json:"Indoor"`
+	Outdoor bool `bson:"outdoor" json:"Outdoor"`
 }
 
 type ShotwotIdeas struct {
