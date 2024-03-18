@@ -9,13 +9,15 @@ import (
 )
 
 type Users interface {
-	Create(ctx context.Context, user *domain.User) error
+	Create(ctx context.Context, user *domain.User) (*domain.User, error)
 
 	Update(ctx context.Context, user *domain.User) (*domain.User, error)
 
 	Get(ctx context.Context, id string) (*domain.User, error)
 
 	GetOrCreate(ctx context.Context, user *domain.User) (*domain.User, error)
+
+	GetOrCreateByPhone(ctx context.Context, user *domain.User) (*domain.User, error)
 
 	GetUsers(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error)
 

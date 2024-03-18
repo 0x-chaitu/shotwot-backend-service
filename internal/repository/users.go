@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"shotwot_backend/internal/domain"
 	"shotwot_backend/pkg/database/mongodb"
 	"shotwot_backend/pkg/helper"
@@ -24,12 +25,20 @@ func NewUsersRepo(db *mongo.Database) *UsersRepo {
 	}
 }
 
-func (r *UsersRepo) Create(ctx context.Context, user *domain.User) error {
-	_, err := r.db.InsertOne(ctx, user)
+func (r *UsersRepo) Create(ctx context.Context, user *domain.User) (*domain.User, error) {
+	res, err := r.db.InsertOne(ctx, user)
 	if mongodb.IsDuplicate(err) {
-		return domain.ErrAccountAlreadyExists
+		return nil, domain.ErrAccountAlreadyExists
 	}
-	return nil
+	if err != nil {
+		return nil, err
+	}
+	insertedID, ok := res.InsertedID.(primitive.ObjectID)
+	if !ok {
+		return nil, fmt.Errorf("failed to convert")
+	}
+	user.Id = insertedID
+	return user, nil
 }
 
 func (r *UsersRepo) GetByCredentials(ctx context.Context, userIdentifier, password string) (domain.User, error) {
@@ -71,11 +80,42 @@ func (r *UsersRepo) Get(ctx context.Context, id string) (*domain.User, error) {
 }
 
 func (r *UsersRepo) GetOrCreate(ctx context.Context, user *domain.User) (*domain.User, error) {
-	filter := bson.M{"_id": user.Id}
+	filter := bson.M{"userId": user.UserId}
 	result := r.db.FindOne(ctx, filter)
 	if result.Err() != nil {
 		if result.Err() == mongo.ErrNoDocuments {
-			_, err := r.db.InsertOne(ctx, user)
+			res, err := r.db.InsertOne(ctx, user)
+			if err != nil {
+				return nil, err
+			}
+			insertedID, ok := res.InsertedID.(primitive.ObjectID)
+			if !ok {
+				return nil, fmt.Errorf("failed to convert")
+			}
+			user.Id = insertedID
+			return user, err
+		} else {
+			return nil, result.Err()
+		}
+	}
+	decodeErr := result.Decode(user)
+	return user, decodeErr
+}
+
+func (r *UsersRepo) GetOrCreateByPhone(ctx context.Context, user *domain.User) (*domain.User, error) {
+	filter := bson.M{"mobile": user.Mobile}
+	result := r.db.FindOne(ctx, filter)
+	if result.Err() != nil {
+		if result.Err() == mongo.ErrNoDocuments {
+			res, err := r.db.InsertOne(ctx, user)
+			if err != nil {
+				return nil, err
+			}
+			insertedID, ok := res.InsertedID.(primitive.ObjectID)
+			if !ok {
+				return nil, fmt.Errorf("failed to convert")
+			}
+			user.Id = insertedID
 			return user, err
 		} else {
 			return nil, result.Err()

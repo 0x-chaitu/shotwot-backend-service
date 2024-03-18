@@ -53,20 +53,16 @@ func (s *UsersService) SignUp(ctx context.Context, input AccountAuthInput) (*Aut
 	}
 	account := &domain.User{
 		Email:    token.Claims["email"].(string),
-		Id:       token.UID,
+		UserId:   token.UID,
 		Created:  time.Now(),
 		UserName: token.UID,
 	}
 
-	err = s.repo.Create(ctx, account)
+	user, err := s.repo.Create(ctx, account)
 	if err != nil {
 		return nil, err
 	}
-	if err != nil {
-		logger.Error(err)
-		return nil, err
-	}
-	tokens, err := s.createSession(ctx, token.UID)
+	tokens, err := s.createSession(ctx, user.Id.String())
 	return &AuthResponse{
 		User:   account,
 		Tokens: tokens,
@@ -82,7 +78,7 @@ func (s *UsersService) SignIn(ctx context.Context, input AccountAuthInput) (*Aut
 	}
 	account := &domain.User{
 		Email:    token.Claims["email"].(string),
-		Id:       token.UID,
+		UserId:   token.UID,
 		Created:  time.Now(),
 		UserName: token.UID,
 	}
@@ -90,7 +86,19 @@ func (s *UsersService) SignIn(ctx context.Context, input AccountAuthInput) (*Aut
 	if err != nil {
 		return nil, err
 	}
-	tokens, err := s.createSession(ctx, token.UID)
+	tokens, err := s.createSession(ctx, user.Id.String())
+	return &AuthResponse{
+		User:   user,
+		Tokens: tokens,
+	}, err
+}
+
+func (s *UsersService) GetOrCreateByPhone(ctx context.Context, user *domain.User) (*AuthResponse, error) {
+	user, err := s.repo.GetOrCreateByPhone(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+	tokens, err := s.createSession(ctx, user.Id.String())
 	return &AuthResponse{
 		User:   user,
 		Tokens: tokens,
@@ -125,7 +133,7 @@ func (s *UsersService) TotalUsers(ctx context.Context) (int64, error) {
 	return s.repo.TotalUsers(ctx)
 }
 
-func (s *UsersService) createSession(ctx context.Context, userId string) (*Tokens, error) {
+func (s *UsersService) createSession(_ context.Context, userId string) (*Tokens, error) {
 	token, err := s.tokenManager.NewJWT(fmt.Sprint(userId), s.accessTokenTTL)
 	if err != nil {
 		logger.Error(err)

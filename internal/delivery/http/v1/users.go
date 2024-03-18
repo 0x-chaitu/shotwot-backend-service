@@ -11,6 +11,12 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
+	otplessAuthSdk "github.com/otpless-tech/otpless-auth-sdk"
+)
+
+const (
+	clientID     = "ON23N0MCOV49Y8C5N1FLNTNLB7FB6RY8"
+	clientSecret = "2eqddf2458gxo1q4tda1enn5plmqfe7z"
 )
 
 func (h *Handler) initUsersRoutes() http.Handler {
@@ -18,6 +24,8 @@ func (h *Handler) initUsersRoutes() http.Handler {
 
 	r.Post("/signup", h.userSignUp)
 	r.Post("/signin", h.userSignIn)
+	r.Post("/otp", h.userOtp)
+	r.Post("/verify-otp", h.verifyOtp)
 	r.Route("/", func(r chi.Router) {
 		r.Use(h.parseUser)
 		r.Put("/update", h.userUpdate)
@@ -99,6 +107,86 @@ func (h *Handler) userSignIn(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (h *Handler) userOtp(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	var otp domain.Otp
+	err := decoder.Decode(&otp)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+	req := otplessAuthSdk.SendOTPRequest{
+		PhoneNumber: otp.Phone,
+		Channel:     "SMS",
+		Expiry:      120,
+		OtpLength:   6,
+	}
+	result, err := otplessAuthSdk.SendOTP(req, clientID, clientSecret)
+
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+
+	render.Status(r, http.StatusOK)
+	render.Render(w, r, &AppResponse{
+		HTTPStatusCode: http.StatusOK,
+		Success:        true,
+		Data:           result,
+	})
+}
+
+func (h *Handler) verifyOtp(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	var otp domain.Otp
+	ctx := r.Context()
+	err := decoder.Decode(&otp)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+	_, err = otplessAuthSdk.VerifyOTP(otp.OrderId, otp.Otp, "", otp.Phone, clientID, clientSecret)
+
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+
+	user := &domain.User{
+		Mobile:   otp.Phone,
+		UserName: otp.Phone,
+		Email:    otp.Phone + "@email.com",
+	}
+
+	res, err := h.services.Users.GetOrCreateByPhone(ctx, user)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      err.Error(),
+		})
+		return
+	}
+
+	render.Status(r, http.StatusOK)
+	render.Render(w, r, &AppResponse{
+		HTTPStatusCode: http.StatusOK,
+		Success:        true,
+		Data:           res,
+	})
+}
+
 func (h *Handler) userUpdate(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var user domain.User
@@ -112,7 +200,7 @@ func (h *Handler) userUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx := r.Context()
 	userIdentity := ctx.Value(userCtx{}).(*jwtauth.CustomClaims)
-	user.Id = userIdentity.Subject
+	user.UserId = userIdentity.Subject
 	updatedUser, err := h.services.Users.Update(ctx, &user)
 	if err != nil {
 		render.Render(w, r, &ErrResponse{

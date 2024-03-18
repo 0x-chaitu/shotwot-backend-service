@@ -38,6 +38,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.23.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.28.0 // indirect
 	github.com/aws/smithy-go v1.20.1 // indirect
+	github.com/otpless-tech/otpless-auth-sdk v1.1.3 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 )
 
