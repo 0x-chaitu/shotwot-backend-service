@@ -89,6 +89,8 @@ type BriefApplications interface {
 
 type Assets interface {
 	Create(ctx context.Context, asset *domain.AssetInput) (*domain.AssetRes, error)
+	Update(ctx context.Context, asset *domain.Asset) (*domain.Asset, error)
+	GetAllAssets(ctx context.Context) ([]*domain.Asset, error)
 }
 
 type SavedBriefs interface {

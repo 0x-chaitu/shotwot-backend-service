@@ -64,6 +64,7 @@ func (h *Handler) Init() http.Handler {
 	r.Mount("/admin", h.initAdminRoutes())
 	r.Mount("/admin/briefs", h.initBriefsRoutes())
 	r.Mount("/admin/brief/", h.initBriefApplicationRoutes())
+	r.Mount("/admin/assets/", h.initAdminAssetsRoutes())
 	r.Mount("/admin/masterclass/", h.initAdminMasterClassRoutes())
 
 	return r

@@ -62,7 +62,7 @@ func (s *UsersService) SignUp(ctx context.Context, input AccountAuthInput) (*Aut
 	if err != nil {
 		return nil, err
 	}
-	tokens, err := s.createSession(ctx, user.Id.String())
+	tokens, err := s.createSession(ctx, user.Id.Hex())
 	return &AuthResponse{
 		User:   account,
 		Tokens: tokens,
@@ -86,7 +86,7 @@ func (s *UsersService) SignIn(ctx context.Context, input AccountAuthInput) (*Aut
 	if err != nil {
 		return nil, err
 	}
-	tokens, err := s.createSession(ctx, user.Id.String())
+	tokens, err := s.createSession(ctx, user.Id.Hex())
 	return &AuthResponse{
 		User:   user,
 		Tokens: tokens,
@@ -98,7 +98,7 @@ func (s *UsersService) GetOrCreateByPhone(ctx context.Context, user *domain.User
 	if err != nil {
 		return nil, err
 	}
-	tokens, err := s.createSession(ctx, user.Id.String())
+	tokens, err := s.createSession(ctx, user.Id.Hex())
 	return &AuthResponse{
 		User:   user,
 		Tokens: tokens,

@@ -21,27 +21,37 @@ func NewAssetsService(repo repository.Assets, s3 *s3.S3Client) *AssetsService {
 }
 
 func (b *AssetsService) Create(ctx context.Context, input *domain.AssetInput) (*domain.AssetRes, error) {
-	var assets = []string{}
-	var urls = []string{}
 	timeKey := time.Now().Format("20060102150405")
-	for _, file := range input.Files {
-		key := "Warehouse@cloud/Shotwot Originals/" + input.BriefId.String() + input.UserId + timeKey + "/" + file.Name
-		url, err := b.s3.PresignedUrl(key, file.Filetype)
-		if err != nil {
-			return nil, err
-		}
-		urls = append(urls, url.URL)
-		assets = append(assets, key)
+	key := "Warehouse@cloud/Shotwot Originals/" + input.BriefId.String() + "/" + input.UserId + "/" + timeKey + "/" + input.File.Name
+	url, err := b.s3.PresignedUrl(key, input.File.Filetype)
+	if err != nil {
+		return nil, err
+	}
+	input.Rating = &domain.Rating{
+		Current: 0,
+		Total:   0,
 	}
 
-	input.AssetFile = assets
+	input.AssetFile = key
 	asset, err := b.repo.Create(ctx, input.Asset)
 	if err != nil {
 		return nil, err
 	}
 	return &domain.AssetRes{
-		Urls:  urls,
+		Url:   url.URL,
 		Asset: asset,
 	}, nil
+}
 
+func (b *AssetsService) Update(ctx context.Context, input *domain.Asset) (*domain.Asset, error) {
+	input.Updated = time.Now()
+	asset, err := b.repo.Update(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+	return asset, nil
+}
+
+func (b *AssetsService) GetAllAssets(ctx context.Context) ([]*domain.Asset, error) {
+	return b.repo.GetAssets(ctx)
 }

@@ -45,8 +45,8 @@ func (r *AdminsRepo) Update(ctx context.Context, admin *domain.Admin) (*domain.A
 		ReturnDocument: &after,
 	}
 	updatedResult := r.db.FindOneAndUpdate(ctx, filter, update, &opt)
-	if err := handleSingleError(updatedResult); err != nil {
-		return nil, err
+	if updatedResult.Err() != nil {
+		return nil, updatedResult.Err()
 	}
 	updatedadmin := domain.Admin{}
 	decodeErr := updatedResult.Decode(&updatedadmin)

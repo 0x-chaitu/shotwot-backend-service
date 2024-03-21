@@ -78,9 +78,11 @@ func (m *Manager) Parse(accessToken string) (*CustomClaims, error) {
 	customClaims := CustomClaims{}
 	jsonbody, err := json.Marshal(data)
 	if err != nil {
+		logger.Info(err)
 		return nil, err
 	}
 	if err := json.Unmarshal(jsonbody, &customClaims); err != nil {
+		logger.Info(err)
 		return nil, err
 	}
 	return &customClaims, nil
