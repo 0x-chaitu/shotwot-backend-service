@@ -82,7 +82,7 @@ func (s *UsersService) SignIn(ctx context.Context, input AccountAuthInput) (*Aut
 		Created:  time.Now(),
 		UserName: token.UID,
 	}
-	user, err := s.repo.GetOrCreate(ctx, account)
+	user, err := s.repo.GetOrCreateByEmail(ctx, account)
 	if err != nil {
 		return nil, err
 	}
