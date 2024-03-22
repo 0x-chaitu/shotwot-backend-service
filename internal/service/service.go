@@ -35,6 +35,7 @@ type Users interface {
 	GetUser(ctx context.Context, id string) (*domain.User, error)
 	Delete(ctx context.Context, id string) error
 	GetOrCreateByPhone(ctx context.Context, user *domain.User) (*AuthResponse, error)
+	GetOrCreateByEmail(ctx context.Context, user *domain.User) (*AuthResponse, error)
 
 	GetUsers(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error)
 

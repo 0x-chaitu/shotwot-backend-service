@@ -118,20 +118,38 @@ func (h *Handler) userOtp(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	req := otplessAuthSdk.SendOTPRequest{
-		PhoneNumber: otp.Phone,
-		Channel:     "SMS",
-		Expiry:      120,
-		OtpLength:   6,
-	}
-	result, err := otplessAuthSdk.SendOTP(req, clientID, clientSecret)
-
-	if err != nil {
-		render.Render(w, r, &ErrResponse{
-			HTTPStatusCode: http.StatusBadRequest,
-			ErrorText:      err.Error(),
-		})
-		return
+	logger.Info(otp)
+	var result *otplessAuthSdk.SendOTPResponse
+	if otp.Email == "" {
+		req := otplessAuthSdk.SendOTPRequest{
+			PhoneNumber: otp.Phone,
+			Channel:     "SMS",
+			Expiry:      120,
+			OtpLength:   6,
+		}
+		result, err = otplessAuthSdk.SendOTP(req, clientID, clientSecret)
+		if err != nil {
+			render.Render(w, r, &ErrResponse{
+				HTTPStatusCode: http.StatusBadRequest,
+				ErrorText:      err.Error(),
+			})
+			return
+		}
+	} else {
+		req := otplessAuthSdk.SendOTPRequest{
+			Email:     otp.Email,
+			Channel:   "EMAIL",
+			Expiry:    120,
+			OtpLength: 6,
+		}
+		result, err = otplessAuthSdk.SendOTP(req, clientID, clientSecret)
+		if err != nil {
+			render.Render(w, r, &ErrResponse{
+				HTTPStatusCode: http.StatusBadRequest,
+				ErrorText:      err.Error(),
+			})
+			return
+		}
 	}
 
 	render.Status(r, http.StatusOK)
@@ -154,7 +172,8 @@ func (h *Handler) verifyOtp(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	_, err = otplessAuthSdk.VerifyOTP(otp.OrderId, otp.Otp, "", otp.Phone, clientID, clientSecret)
+
+	_, err = otplessAuthSdk.VerifyOTP(otp.OrderId, otp.Otp, otp.Email, otp.Phone, clientID, clientSecret)
 
 	if err != nil {
 		render.Render(w, r, &ErrResponse{
@@ -163,14 +182,23 @@ func (h *Handler) verifyOtp(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+	var res *service.AuthResponse
+	if otp.Email == "" {
+		user := &domain.User{
+			Mobile:   otp.Phone,
+			UserName: otp.Phone,
+		}
+		res, err = h.services.Users.GetOrCreateByPhone(ctx, user)
 
-	user := &domain.User{
-		Mobile:   otp.Phone,
-		UserName: otp.Phone,
-		Email:    otp.Phone + "@email.com",
+	} else {
+		user := &domain.User{
+			UserName: otp.Email,
+			Email:    otp.Email,
+		}
+		res, err = h.services.Users.GetOrCreateByEmail(ctx, user)
+
 	}
 
-	res, err := h.services.Users.GetOrCreateByPhone(ctx, user)
 	if err != nil {
 		render.Render(w, r, &ErrResponse{
 			HTTPStatusCode: http.StatusBadRequest,

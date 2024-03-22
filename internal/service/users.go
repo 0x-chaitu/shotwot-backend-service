@@ -105,6 +105,22 @@ func (s *UsersService) GetOrCreateByPhone(ctx context.Context, user *domain.User
 	}, err
 }
 
+func (s *UsersService) GetOrCreateByEmail(ctx context.Context, user *domain.User) (*AuthResponse, error) {
+	fireUser := &fireauth.UserToCreate{}
+	fireUser = fireUser.Email(user.Email).Password(time.Now().String())
+	s.firebaseAuthClient.CreateUser(ctx, fireUser)
+
+	user, err := s.repo.GetOrCreateByEmail(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+	tokens, err := s.createSession(ctx, user.Id.Hex())
+	return &AuthResponse{
+		User:   user,
+		Tokens: tokens,
+	}, err
+}
+
 func (s *UsersService) Download(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error) {
 	return s.repo.Download(ctx, predicate)
 }

@@ -125,6 +125,29 @@ func (r *UsersRepo) GetOrCreateByPhone(ctx context.Context, user *domain.User) (
 	return user, decodeErr
 }
 
+func (r *UsersRepo) GetOrCreateByEmail(ctx context.Context, user *domain.User) (*domain.User, error) {
+	filter := bson.M{"email": user.Email}
+	result := r.db.FindOne(ctx, filter)
+	if result.Err() != nil {
+		if result.Err() == mongo.ErrNoDocuments {
+			res, err := r.db.InsertOne(ctx, user)
+			if err != nil {
+				return nil, err
+			}
+			insertedID, ok := res.InsertedID.(primitive.ObjectID)
+			if !ok {
+				return nil, fmt.Errorf("failed to convert")
+			}
+			user.Id = insertedID
+			return user, err
+		} else {
+			return nil, result.Err()
+		}
+	}
+	decodeErr := result.Decode(user)
+	return user, decodeErr
+}
+
 func (r *UsersRepo) Download(ctx context.Context, predicate *helper.UsersPredicate) ([]*domain.User, error) {
 	opts := options.Find().SetSort(bson.D{{Key: "created", Value: -1}})
 	// filter := bson.M{"created": bson.M{"$gte": predicate.StartDate,
