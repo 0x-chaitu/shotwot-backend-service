@@ -92,7 +92,10 @@ func (r *BriefsRepo) Update(ctx context.Context, brief *domain.Brief) (*domain.B
 }
 
 func (r *BriefsRepo) GetBrief(ctx context.Context, id string) (*domain.Brief, error) {
-	briedId, _ := primitive.ObjectIDFromHex(id)
+	briedId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
 
 	filter := bson.M{"_id": briedId}
 	result := r.db.FindOne(ctx, filter)

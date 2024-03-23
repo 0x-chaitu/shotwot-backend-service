@@ -69,7 +69,11 @@ func (r *UsersRepo) Update(ctx context.Context, user *domain.User) (*domain.User
 }
 
 func (r *UsersRepo) Get(ctx context.Context, id string) (*domain.User, error) {
-	filter := bson.M{"_id": id}
+	userId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	filter := bson.M{"_id": userId}
 	result := r.db.FindOne(ctx, filter)
 	if err := handleSingleError(result); err != nil {
 		return nil, err
