@@ -100,6 +100,10 @@ func (b *BriefsService) GetBriefs(ctx context.Context, predicate *helper.BriefPr
 	return b.repo.GetBriefs(ctx, predicate)
 }
 
+func (b *BriefsService) GetUserBriefs(ctx context.Context, predicate *helper.BriefPredicate) ([]*domain.Brief, error) {
+	return b.repo.GetUserBriefs(ctx, predicate)
+}
+
 func (b *BriefsService) GetBrief(ctx context.Context, id string) (*domain.Brief, error) {
 	return b.repo.GetBrief(ctx, id)
 }

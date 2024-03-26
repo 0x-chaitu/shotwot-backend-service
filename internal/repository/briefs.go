@@ -5,6 +5,7 @@ import (
 	"shotwot_backend/internal/domain"
 	"shotwot_backend/pkg/helper"
 	"shotwot_backend/pkg/logger"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -52,6 +53,63 @@ func (r *BriefsRepo) GetBriefs(ctx context.Context, predicate *helper.BriefPredi
 
 	}
 	opts := options.Find().SetSort(bson.D{{Key: "created", Value: predicate.Order}})
+	cursor, err := r.db.Find(ctx, filter, opts)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+	// cursor.SetBatchSize(20)
+
+	var results []*domain.Brief
+	if err = cursor.All(ctx, &results); err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}
+
+func (r *BriefsRepo) GetUserBriefs(ctx context.Context, predicate *helper.BriefPredicate) ([]*domain.Brief, error) {
+	filter := bson.D{}
+	filter = append(filter, bson.E{Key: "isActive", Value: true})
+
+	if predicate.Type != "" {
+		filter = append(filter, bson.E{Key: "type", Value: predicate.Type})
+	}
+
+	switch predicate.Expiry {
+	case 1:
+		filter = append(filter, bson.E{Key: "expiry", Value: bson.D{
+			{Key: "$gt", Value: time.Now()}}})
+		filter = append(filter, bson.E{Key: "expiry", Value: bson.D{
+			{Key: "$lt", Value: time.Now().Add(24 * 7 * time.Hour)}}})
+	case 2:
+		filter = append(filter, bson.E{Key: "expiry", Value: bson.D{
+			{Key: "$gt", Value: time.Now()}}})
+		filter = append(filter, bson.E{Key: "expiry", Value: bson.D{
+			{Key: "$lt", Value: time.Now().Add(24 * 15 * time.Hour)}}})
+	case 3:
+		filter = append(filter, bson.E{Key: "expiry", Value: bson.D{
+			{Key: "$gt", Value: time.Now().Add(24 * 15 * time.Hour)}}})
+		filter = append(filter, bson.E{Key: "expiry", Value: bson.D{
+			{Key: "$lt", Value: time.Now().Add(24 * 30 * time.Hour)}}})
+	case 4:
+		filter = append(filter, bson.E{Key: "expiry", Value: bson.D{
+			{Key: "$gt", Value: time.Now().Add(24 * 30 * time.Hour)}}})
+
+	default:
+	}
+
+	if predicate.RewardG != 0 {
+		filter = append(filter, bson.E{Key: "reward", Value: bson.D{
+			{Key: "$gt", Value: predicate.RewardG}}})
+	}
+
+	if predicate.RewardL != 0 {
+		filter = append(filter, bson.E{Key: "reward", Value: bson.D{
+			{Key: "$lt", Value: predicate.RewardL}}})
+	}
+
+	opts := options.Find().SetSkip(predicate.Skip).SetLimit(5).SetSort(bson.D{{Key: "created", Value: -1}})
 	cursor, err := r.db.Find(ctx, filter, opts)
 	if err != nil {
 		return nil, err

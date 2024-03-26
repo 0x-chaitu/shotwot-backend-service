@@ -19,20 +19,23 @@ func (h *Handler) initUserBriefRoutes() http.Handler {
 		r.Post("/apply", h.createBriefApplication)
 		r.Post("/save", h.saveBrief)
 		r.Get("/list/saved", h.listSavedBriefs)
-		r.Get("/list", h.listBriefsUser)
+		r.Post("/list", h.listBriefsUser)
 		r.Get("/list/applied", h.getUserAppliedBriefs)
 	})
 	return r
 }
 
 func (h *Handler) listBriefsUser(w http.ResponseWriter, r *http.Request) {
-	active := true
-	predicate := helper.BriefPredicate{
-		IsActive: &active,
-		Order:    -1,
+	predicate := helper.BriefPredicate{}
+	if err := json.NewDecoder(r.Body).Decode(&predicate); err != nil {
+		render.Render(w, r, &ErrResponse{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorText:      err.Error(),
+		})
+		return
 	}
 
-	briefList, err := h.services.Briefs.GetBriefs(r.Context(), &predicate)
+	briefList, err := h.services.Briefs.GetUserBriefs(r.Context(), &predicate)
 	if err != nil {
 		render.Render(w, r, &ErrResponse{
 			HTTPStatusCode: http.StatusInternalServerError,

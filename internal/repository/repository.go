@@ -49,6 +49,8 @@ type Briefs interface {
 
 	GetBriefs(ctx context.Context, predicate *helper.BriefPredicate) ([]*domain.Brief, error)
 
+	GetUserBriefs(ctx context.Context, predicate *helper.BriefPredicate) ([]*domain.Brief, error)
+
 	DeleteBrief(ctx context.Context, id string) error
 
 	CreateDraft(ctx context.Context, brief *domain.Brief) (*domain.Brief, error)
