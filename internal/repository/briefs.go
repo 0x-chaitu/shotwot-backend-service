@@ -72,8 +72,14 @@ func (r *BriefsRepo) GetUserBriefs(ctx context.Context, predicate *helper.BriefP
 	filter := bson.D{}
 	filter = append(filter, bson.E{Key: "isActive", Value: true})
 
-	if predicate.Type != "" {
-		filter = append(filter, bson.E{Key: "type", Value: predicate.Type})
+	if len(predicate.Type) > 0 {
+		typeF := []bson.M{}
+		for _, v := range predicate.Type {
+			typeF = append(typeF, bson.M{"type": v})
+		}
+		filter = append(filter, bson.E{
+			Key: "$or", Value: typeF},
+		)
 	}
 
 	switch predicate.Expiry {
@@ -109,7 +115,8 @@ func (r *BriefsRepo) GetUserBriefs(ctx context.Context, predicate *helper.BriefP
 			{Key: "$lt", Value: predicate.RewardL}}})
 	}
 
-	opts := options.Find().SetSkip(predicate.Skip).SetLimit(5).SetSort(bson.D{{Key: "created", Value: -1}})
+	opts := options.Find().SetSort(bson.D{{Key: "created", Value: -1}})
+	// .SetSkip(predicate.Skip).SetLimit(5)
 	cursor, err := r.db.Find(ctx, filter, opts)
 	if err != nil {
 		return nil, err

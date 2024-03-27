@@ -28,11 +28,11 @@ type BriefPredicate struct {
 	ByDate    string `json:"byDate,omitempty"`
 	CreatedBy string `json:"createdBy,omitempty"`
 
-	Type    string `json:"type,omitempty" `
-	Expiry  int    `json:"expiry,omitempty"`
-	RewardL int    `json:"rewardL,omitempty"`
-	RewardG int    `json:"rewardG,omitempty"`
-	Skip    int64  `json:"skip,omitempty"`
+	Type    []string `json:"type,omitempty" `
+	Expiry  int      `json:"expiry,omitempty"`
+	RewardL int      `json:"rewardL,omitempty"`
+	RewardG int      `json:"rewardG,omitempty"`
+	Skip    int64    `json:"skip,omitempty"`
 }
 
 type UsersPredicate struct {
